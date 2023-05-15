@@ -24,7 +24,7 @@ POLLING_INTERVAL = 0.01
 def main(opt):
     project_dir = ROOT / opt.project_id
     video_dir = project_dir / 'Videos'
-    cloud_root = opt.cloud_root
+    cloud_root = pathlib.PurePath(opt.cloud_root)
 
     start_time = time(hour=opt.start_hour)
     end_time = time(hour=opt.end_hour)
@@ -69,12 +69,11 @@ def main(opt):
             collector.stop_recording()
             roi_detector, ooi_detector, behavior_recognizer, collector = None, None, None, None
         else:
-            uploader = Uploader()
+            uploader = Uploader(ROOT, cloud_root, opt.project_id)
             uploader.upload_all()
             while current_time > end_time or current_time < start_time:
                 current_time = datetime.now().time()
                 sleep(POLLING_INTERVAL)
-
 
 
 def parse_opt(known=False):
