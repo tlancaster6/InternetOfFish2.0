@@ -92,12 +92,12 @@ def parse_opt(known=False):
     parser.add_argument('--roi_model',
                         type=str,
                         help='full name of the tflite file for the region-of-interest detection model.',
-                        default='pipe_detector.tflite')
+                        default='roi.tflite')
 
     parser.add_argument('--ooi_model',
                         type=str,
                         help='full name of the tflite file for the object-of-interest (ooi) detection model.',
-                        default='fish_detector.tflite'
+                        default='ooi.tflite'
                         )
 
     parser.add_argument('--roi_confidence_thresh',
