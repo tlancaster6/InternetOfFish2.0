@@ -27,6 +27,7 @@ class DetectorBase:
     def detect_yolo(self, img):
         h, w, ch = img.shape
         img = (img / self.scale + self.zero_point).astype(np.uint8)
+        img = np.expand_dims(img, axis=0)
         self.interpreter.set_tensor(self.input_details[0]['index'], img)
         self.interpreter.invoke()
         y = []
