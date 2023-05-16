@@ -33,7 +33,7 @@ def test_collect_video(data_collector_fixture):
     dc.start_recording()
     sleep(2)
     dc.stop_recording()
-    assert dc.video_dir.glob('*.h264')
+    assert list(dc.video_dir.glob('*.h264'))
 
 
 def test_split_recording(data_collector_fixture):
@@ -43,7 +43,7 @@ def test_split_recording(data_collector_fixture):
     dc.split_recording()
     sleep(2)
     dc.stop_recording()
-    assert len(dc.video_dir.glob('*.h264')) == 2
+    assert len(list(dc.video_dir.glob('*.h264'))) == 2
 
 
 def test_capture_frame(data_collector_fixture):
