@@ -9,6 +9,7 @@ import cv2
 class DataCollector:
 
     def __init__(self, video_dir, picamera_kwargs=None):
+        self.picamera_kwargs = picamera_kwargs
         self.video_dir = video_dir
         self.cam = self.init_camera(picamera_kwargs)
         self.resolution = self.cam.resolution
