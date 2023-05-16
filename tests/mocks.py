@@ -3,9 +3,9 @@ import cv2
 
 class MockDataCollector:
 
-    def __init__(self, source_video, ):
+    def __init__(self, source_video):
         self.source_video = source_video
-        self.cap = cv2.VideoCapture(self.source_video)
+        self.cap = cv2.VideoCapture(str(self.source_video))
         self.resolution = (int(self.cap.get(3)), int(self.cap.get(4)))
         self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
 
