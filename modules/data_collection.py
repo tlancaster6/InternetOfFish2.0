@@ -24,10 +24,10 @@ class DataCollector:
         return self.video_dir / f'{iso_string}.h264'
 
     def start_recording(self):
-        self.cam.start_recording(self.generate_h264_path())
+        self.cam.start_recording(str(self.generate_h264_path()))
 
     def split_recording(self):
-        self.cam.split_recording(self.generate_h264_path())
+        self.cam.split_recording(str(self.generate_h264_path()))
 
     def stop_recording(self):
         self.cam.stop_recording()
