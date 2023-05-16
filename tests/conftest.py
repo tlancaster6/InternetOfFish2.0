@@ -4,10 +4,8 @@ import shutil
 from modules.data_collection import DataCollector
 from modules.object_detection import DetectorBase
 from tests.mocks import MockDataCollector
-from importlib.resources import files
-from tests import resources
 
-TESTING_RESOURCE_DIR = files(resources)
+TESTING_RESOURCE_DIR = pathlib.Path(__file__).resolve().parents[0] / 'resources'
 
 
 @pytest.fixture
