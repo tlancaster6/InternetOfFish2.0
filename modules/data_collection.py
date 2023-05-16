@@ -33,7 +33,7 @@ class DataCollector:
         self.cam.stop_recording()
 
     def capture_frame(self):
-        image = np.empty((self.resolution[1], self.resolution[0], 3), dtype=np.uint8)
+        image = np.zeros((self.resolution[1], self.resolution[0], 3), dtype=np.uint8)
         self.cam.capture(image, format='rgb', use_video_port=True)
         return image
 
