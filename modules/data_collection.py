@@ -9,6 +9,7 @@ import cv2
 class DataCollector:
 
     def __init__(self, video_dir, picamera_kwargs=None):
+        self.picamera_kwargs = picamera_kwargs
         self.video_dir = video_dir
         self.cam = self.init_camera(picamera_kwargs)
         self.resolution = self.cam.resolution
@@ -23,10 +24,10 @@ class DataCollector:
         return self.video_dir / f'{iso_string}.h264'
 
     def start_recording(self):
-        self.cam.start_recording(self.generate_h264_path())
+        self.cam.start_recording(str(self.generate_h264_path()))
 
     def split_recording(self):
-        self.cam.split_recording(self.generate_h264_path())
+        self.cam.split_recording(str(self.generate_h264_path()))
 
     def stop_recording(self):
         self.cam.stop_recording()
@@ -37,6 +38,5 @@ class DataCollector:
         return image
 
     def shutdown(self):
-        self.stop_recording()
         self.cam.close()
 

@@ -156,6 +156,12 @@ def parse_opt(known=False):
                         default=3
                         )
 
+    parser.add_argument('--test',
+                        action='store_true',
+                        help='use this flag to put the program into test mode. In test mode, a pre-recorded clip is'
+                             'used in place of a live video stream',
+                        )
+
     parser.add_argument()
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
