@@ -41,6 +41,7 @@ class DetectorBase:
             y.append(x)
         y = [x if isinstance(x, np.ndarray) else x.numpy() for x in y]
         y[0][..., :4] *= [w, h, w, h]
+        return y
 
     def detect_effdet(self, img):
         scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])

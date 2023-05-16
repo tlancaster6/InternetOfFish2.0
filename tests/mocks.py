@@ -1,6 +1,5 @@
 import cv2
 
-
 class MockDataCollector:
 
     def __init__(self, source_video):
