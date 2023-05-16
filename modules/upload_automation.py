@@ -1,5 +1,5 @@
 """code for automating data uploads via rclone"""
-from glob import glob
+
 
 class Uploader:
 
@@ -13,5 +13,10 @@ class Uploader:
 
     def convert_h264s_to_mp4s(self):
         local_video_dir = self.local_root / self.project_id / 'Videos'
-        video_paths = glob()
+        h264_paths = local_video_dir.glob('*.h264')
+        for h264_p in h264_paths:
+            mp4_path = h264_paths.with_suffix('.mp4')
+            command = ['ffmpeg', '-analyzeduration', '100M', '-probesize', '100M', '-r',
+                       str(framerate), '-i', h264_p, '-threads', '1', '-c:v', 'copy', '-r',
+                       str(framerate), mp4_path]
 
