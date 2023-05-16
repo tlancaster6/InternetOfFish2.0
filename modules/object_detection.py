@@ -18,16 +18,31 @@ class DetectorBase:
         self.confidence_thresh = confidence_thresh
         self.interpreter = make_interpreter(model_path)
         self.interpreter.allocate_tensors()
-        self.inference_size = common.input_size(self.interpreter)
+        self.input_size = common.input_size(self.interpreter)
 
-    def detect(self, img):
-        scale = (self.inference_size[1] / img.shape[1], self.inference_size[0] / img.shape[0])
-        img = cv2.resize(img, self.inference_size)
+        self.input_details = self.interpreter.get_input_details()
+        self.scale, self.zero_point = self.input_details[0]['quantization']
+        self.output_details = self.interpreter.get_output_details()
+
+    def detect_yolo(self, img):
+        h, w, ch = img.shape
+        img = (img / self.scale + self.zero_point).astype(np.uint8)
+        self.interpreter.set_tensor(self.input_details['index'], img)
+        self.interpreter.invoke()
+        y = []
+        for output in self.output_details:
+            x = self.interpreter.get_tensor(output['index'])
+            x = (x.astype(np.float32) - self.zero_point) * self.scale  # re-scale
+            y.append(x)
+        y = [x if isinstance(x, np.ndarray) else x.numpy() for x in y]
+        y[0][..., :4] *= [w, h, w, h]
+
+    def detect_effdet(self, img):
+        scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])
+        img = cv2.resize(img, self.input_size)
         run_inference(self.interpreter, img.tobytes())
         dets = detect.get_objects(self.interpreter, self.confidence_thresh, scale)
         return sorted(dets, reverse=True, key=lambda x: x.score)
-
-
 
 
 

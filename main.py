@@ -123,7 +123,7 @@ def parse_opt(known=False):
     parser.add_argument('--v_resolution',
                         type=int,
                         help='picamera vertical resolution',
-                        default=976)
+                        default=720)
 
     parser.add_argument('--framegrab_interval',
                         type=float,
