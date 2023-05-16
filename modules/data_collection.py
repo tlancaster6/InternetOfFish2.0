@@ -38,6 +38,5 @@ class DataCollector:
         return image
 
     def shutdown(self):
-        self.stop_recording()
         self.cam.close()
 
