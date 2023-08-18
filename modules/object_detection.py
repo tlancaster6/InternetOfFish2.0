@@ -16,7 +16,7 @@ class DetectorBase:
 
     def __init__(self, model_path, confidence_thresh=0.25):
         self.confidence_thresh = confidence_thresh
-        self.interpreter = make_interpreter(model_path)
+        self.interpreter = make_interpreter(str(model_path))
         self.interpreter.allocate_tensors()
         self.input_size = common.input_size(self.interpreter)
 
