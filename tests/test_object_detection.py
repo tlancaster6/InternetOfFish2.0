@@ -6,5 +6,7 @@ def test_mock_data_collector(mock_data_collector_fixture):
 
 def test_roi_detection(mock_data_collector_fixture, roi_detector_fixture):
     mdc, roid = mock_data_collector_fixture, roi_detector_fixture
+    img = mdc.capture_frame()
+    dets = roid.detect_effdet(img)
 
 
