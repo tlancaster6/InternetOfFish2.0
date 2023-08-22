@@ -9,7 +9,7 @@ from modules.data_collection import DataCollector
 from modules.object_detection import DetectorBase
 from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
-
+from modules.config_manager import ConfigManager
 # establish a stable location within the filesystem
 FILE = pathlib.Path(__file__).resolve()
 LOCAL_ROOT = FILE.parents[0]  # repository root
@@ -17,30 +17,38 @@ if str(LOCAL_ROOT) not in sys.path:
     sys.path.append(str(LOCAL_ROOT))  # add LOCAL_ROOT to system path
 ROOT = pathlib.Path(os.path.relpath(LOCAL_ROOT, pathlib.Path.cwd()))  # relative to working directory
 MODEL_DIR = ROOT / 'models'
+DATA_DIR = ROOT / 'projects'
 
 POLLING_INTERVAL = 0.01
 
 
-def main(opt):
-    project_dir = ROOT / opt.project_id
+def main(project_id):
+    project_dir = DATA_DIR / project_id
+    config_path = project_dir / 'config.yaml'
+    config_manager = ConfigManager(config_path)
+    if not config_path.exists():
+        project_dir.mkdir(parents=True)
+        config_manager.generate_new_config(project_id)
+        print('new project config generated. Edit this file if desired, then re-run main.py to initiate data collection')
+        return
+    config = config_manager.config_as_namespace()
     video_dir = project_dir / 'Videos'
-    cloud_root = pathlib.PurePath(opt.cloud_root)
 
-    start_time = time(hour=opt.start_hour)
-    end_time = time(hour=opt.end_hour)
+    start_time = time(hour=config.start_hour)
+    end_time = time(hour=config.end_hour)
 
-    roi_update_interval = timedelta(seconds=opt.roi_update_interval)
-    framegrab_interval = timedelta(seconds=opt.framegrab_interval)
-    video_split_interval = timedelta(hours=opt.video_split_hours)
+    roi_update_interval = timedelta(seconds=config.roi_update_interval)
+    framegrab_interval = timedelta(seconds=config.framegrab_interval)
+    video_split_interval = timedelta(hours=config.video_split_hours)
 
-    picamera_kwargs = {'framerate': opt.framerate, 'resolution': (opt.h_resolution, opt.v_resolution)}
+    picamera_kwargs = {'framerate': config.framerate, 'resolution': (config.h_resolution, config.v_resolution)}
 
     while True:
         current_time = datetime.now().time()
         if start_time < current_time < end_time:
             collector = DataCollector(video_dir, picamera_kwargs)
-            roi_detector = DetectorBase(MODEL_DIR / opt.roi_model, opt.roi_confidence_thresh)
-            ooi_detector = DetectorBase(MODEL_DIR / opt.ooi_model, opt.ooi_confidence_thresh)
+            roi_detector = DetectorBase(MODEL_DIR / config.roi_model, config.roi_confidence_thresh)
+            ooi_detector = DetectorBase(MODEL_DIR / config.ooi_model, config.ooi_confidence_thresh)
             behavior_recognizer = BehaviorRecognizer()
             collector.start_recording()
 
@@ -69,7 +77,7 @@ def main(opt):
             collector.stop_recording()
             roi_detector, ooi_detector, behavior_recognizer, collector = None, None, None, None
         else:
-            uploader = Uploader(ROOT, cloud_root, opt.project_id)
+            uploader = Uploader(project_dir, config.cloud_project_dir, config.framerate)
             uploader.upload_all()
             while current_time > end_time or current_time < start_time:
                 current_time = datetime.now().time()
@@ -84,96 +92,10 @@ def parse_opt(known=False):
                         help='unique name for this project.',
                         default='default_project')
 
-    parser.add_argument('--cloud_root',
-                        type=str,
-                        help='Destination for cloud uploads. If None (default) automatic uploads will be skipped.',
-                        default=None)
-
-    parser.add_argument('--roi_model',
-                        type=str,
-                        help='full name of the tflite file for the region-of-interest detection model.',
-                        default='roi.tflite')
-
-    parser.add_argument('--ooi_model',
-                        type=str,
-                        help='full name of the tflite file for the object-of-interest (ooi) detection model.',
-                        default='ooi.tflite'
-                        )
-
-    parser.add_argument('--roi_confidence_thresh',
-                        type=float,
-                        help='minimum confidence for a region-of-interest detection to be considered valid.',
-                        default=0.75)
-
-    parser.add_argument('--ooi_confidence_thresh',
-                        type=float,
-                        help='minimum confidence for an object-of-interest detection to be considered valid.',
-                        default=0.25)
-
-    parser.add_argument('--framerate',
-                        type=int,
-                        help='picamera framerate in fps',
-                        default=30)
-
-    parser.add_argument('--h_resolution',
-                        type=int,
-                        help='picamera horizontal resolution',
-                        default=1280)
-
-    parser.add_argument('--v_resolution',
-                        type=int,
-                        help='picamera vertical resolution',
-                        default=720)
-
-    parser.add_argument('--framegrab_interval',
-                        type=float,
-                        help='seconds between successive frame-grabs.',
-                        default=0.2)
-
-    parser.add_argument('--roi_update_interval',
-                        type=float,
-                        help='seconds between successive ROI updates. Must be greater than or equal to '
-                             'framegrab_interval. Use small numbers if the ROI can move',
-                        default=600)
-
-    parser.add_argument('--start_hour',
-                        type=int,
-                        help='when to start collecting data. Defaults to 7, meaning data collection starts at 7:00am '
-                             'each day.',
-                        default=7)
-
-    parser.add_argument('--end_hour',
-                        type=int,
-                        help='when to stop collecting data. Defaults to 19, meaning data collection ends at 19:00, '
-                             'or 7:00pm, each day.',
-                        default=19)
-
-    parser.add_argument('--video_split_hours',
-                        type=int,
-                        help='maximum length, in hours, of each recorded video. Useful for keeping individual file'
-                             'sizes manageable. The switch from one file destination to the next is usually seamless,'
-                             'with at most a few dropped frames',
-                        default=3
-                        )
-
-    parser.add_argument('--test',
-                        action='store_true',
-                        help='use this flag to put the program into test mode. In test mode, a pre-recorded clip is'
-                             'used in place of a live video stream',
-                        )
-
     parser.add_argument()
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
 
-def run(**kwargs):
-    opt = parse_opt(True)
-    for k, v in kwargs.items():
-        setattr(opt, k, v)
-    main(opt)
-    return opt
-
-
 if __name__ == "__main__":
     opt = parse_opt()
-    main(opt)
+    main(opt.project_id)

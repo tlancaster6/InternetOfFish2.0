@@ -1,6 +1,7 @@
 # repo specific
 projects/*
 !projects/sample
+scratch.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

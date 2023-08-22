@@ -43,7 +43,7 @@ class DetectorBase:
     #     y[0][..., :4] *= [w, h, w, h]
     #     return y
 
-    def detect_effdet(self, img):
+    def detect(self, img):
         scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])
         img = cv2.resize(img, self.input_size)
         run_inference(self.interpreter, img.tobytes())
