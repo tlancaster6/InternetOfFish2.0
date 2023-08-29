@@ -53,6 +53,6 @@ class DetectorBase:
 
 
 
-
+7,578,240 bytes
 
 
