@@ -1,12 +1,12 @@
-def test_mock_data_collector(mock_data_collector_fixture):
-    mdc = mock_data_collector_fixture
-    img = mdc.capture_frame()
-    assert mdc.resolution == (img.shape[1], img.shape[0])
 
 
-def test_roi_detection(mock_data_collector_fixture, roi_detector_fixture):
-    mdc, roid = mock_data_collector_fixture, roi_detector_fixture
-    img = mdc.capture_frame()
-    dets = roid.detect_effdet(img)
+def test_roi_detection(roi_detector_fixture, sample_img_loader_fixture):
+    roid, img = roi_detector_fixture, sample_img_loader_fixture
+    bbox = roid.detect_effdet(img)[0].bbox
+    assert bbox.xmin + bbox.xmax + bbox.ymin + bbox.ymax == 1971
 
 
+def test_ooi_detection(ooi_detector_fixture, sample_img_loader_fixture):
+    ooid, img = ooi_detector_fixture, sample_img_loader_fixture
+    bbox = ooid.detect_effdet(img)
+    assert bbox.xmin + bbox.xmax + bbox.ymin + bbox.ymax == 1971

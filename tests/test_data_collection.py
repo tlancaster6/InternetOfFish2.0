@@ -32,3 +32,9 @@ def test_capture_frame(data_collector_fixture):
     img = dc.capture_frame()
     dc.stop_recording()
     assert img.sum()
+
+
+def test_mock_data_collector(mock_data_collector_fixture):
+    mdc = mock_data_collector_fixture
+    img = mdc.capture_frame()
+    assert img.sum() == 309161381

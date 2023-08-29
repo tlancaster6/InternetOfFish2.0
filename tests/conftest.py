@@ -1,6 +1,7 @@
 import pytest
 import pathlib
 import shutil
+import cv2
 from modules.data_collection import DataCollector
 from modules.object_detection import DetectorBase
 from tests.mocks import MockDataCollector
@@ -30,6 +31,18 @@ def mock_data_collector_fixture():
     mock_dc = MockDataCollector(TESTING_RESOURCE_DIR / 'sample_clip.mp4')
     yield mock_dc
     mock_dc.shutdown()
+
+
+@pytest.fixture
+def sample_img_loader_fixture():
+    img = cv2.imread(TESTING_RESOURCE_DIR / 'sample_image.png', cv2.IMREAD_COLOR)
+    yield cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+
+@pytest.fixture
+def sample_cropped_img_loader_fixture():
+    img = cv2.imread(TESTING_RESOURCE_DIR / 'sample_image_cropped.png', cv2.IMREAD_COLOR)
+    yield cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 @pytest.fixture
