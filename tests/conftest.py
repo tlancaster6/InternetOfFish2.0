@@ -35,13 +35,13 @@ def mock_data_collector_fixture():
 
 @pytest.fixture
 def sample_img_loader_fixture():
-    img = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image.png', cv2.IMREAD_COLOR))
+    img = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR)
     yield cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
 @pytest.fixture
 def sample_cropped_img_loader_fixture():
-    img = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image_cropped.png', cv2.IMREAD_COLOR))
+    img = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR)
     yield cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 
