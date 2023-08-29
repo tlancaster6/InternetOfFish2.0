@@ -1,0 +1,1 @@
+store your credential files in this directory using the file extension ".secret" to ensure they are never synced to github

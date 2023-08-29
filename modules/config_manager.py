@@ -24,6 +24,7 @@ class ConfigManager:
         config = {
             'project_id': project_id,
             'cloud_project_dir': None,   # cloud path, including the rclone remote, where the project will be stored
+            'user_email': None,
             'roi_model': 'roi.tflite',
             'ooi_model': 'ooi.tflite',
             'roi_confidence_thresh': 0.75,

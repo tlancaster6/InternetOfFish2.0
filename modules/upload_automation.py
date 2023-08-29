@@ -1,7 +1,7 @@
 """code for automating data uploads via rclone"""
 import subprocess as sp
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 class Uploader:
 
@@ -10,12 +10,11 @@ class Uploader:
         self.cloud_project_dir = cloud_project_dir
         self.framerate = video_framerate
 
-    def upload_all(self):
+    def convert_and_upload(self):
         self.convert_h264s_to_mp4s()
         if not self.cloud_project_dir:
             return
         self.upload_project()
-
 
     def convert_h264s_to_mp4s(self):
         local_video_dir = self.local_project_dir / 'Videos'
@@ -35,5 +34,15 @@ class Uploader:
                     os.remove(mp4_path)
 
     def upload_project(self):
+        local_video_dir = Path(self.local_project_dir) / 'Videos'
+        cloud_video_dir = PurePosixPath(self.cloud_project_dir) / 'Videos'
+        vid_move_cmd = ['rclone', 'move', str(local_video_dir), str(cloud_video_dir)]
+        vid_move_out = sp.run(vid_move_cmd, capture_output=True, encoding='utf-8')
+        if vid_move_out.stderr:
+            print(f'moving videos to cloud may have failed: \n {vid_move_out.stderr}')
+        copy_cmd = ['rclone', 'copy', str(self.local_project_dir), str(self.cloud_project_dir)]
+        copy_out = sp.run(copy_cmd, capture_output=True, encoding='utf-8')
+        if copy_out.stderr:
+            print(f'copying project files to cloud may have failed: \n {copy_out.stderr}')
 
 

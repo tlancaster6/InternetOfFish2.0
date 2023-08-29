@@ -2,6 +2,7 @@
 projects/*
 !projects/sample
 scratch.py
+*.secret
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

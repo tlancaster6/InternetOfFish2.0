@@ -18,6 +18,7 @@ if str(LOCAL_ROOT) not in sys.path:
 ROOT = pathlib.Path(os.path.relpath(LOCAL_ROOT, pathlib.Path.cwd()))  # relative to working directory
 MODEL_DIR = ROOT / 'models'
 DATA_DIR = ROOT / 'projects'
+SENDGRID_CREDENTIAL_FILE = ROOT / 'credentials' / 'sendgrid_key.secret'
 
 POLLING_INTERVAL = 0.01
 
@@ -29,7 +30,10 @@ def main(project_id):
     if not config_path.exists():
         project_dir.mkdir(parents=True)
         config_manager.generate_new_config(project_id)
-        print('new project config generated. Edit this file if desired, then re-run main.py to initiate data collection')
+        print('new project config generated. Edit this file if desired, then re-run main.py to \n'
+              'initiate data collection. Note that, to enable email notifications and rclone uploads, \n'
+              'you must supply the "cloud_project_dir" and "user_email" fields manually in the config \n')
+
         return
     config = config_manager.config_as_namespace()
     video_dir = project_dir / 'Videos'
@@ -78,7 +82,7 @@ def main(project_id):
             roi_detector, ooi_detector, behavior_recognizer, collector = None, None, None, None
         else:
             uploader = Uploader(project_dir, config.cloud_project_dir, config.framerate)
-            uploader.upload_all()
+            uploader.convert_and_upload()
             while current_time > end_time or current_time < start_time:
                 current_time = datetime.now().time()
                 sleep(POLLING_INTERVAL)
@@ -92,7 +96,10 @@ def parse_opt(known=False):
                         help='unique name for this project.',
                         default='default_project')
 
-    parser.add_argument()
+    # parser.add_argument('--test',
+    #                     action='store_true',
+    #                     help='run a suite of automated tests to diagnose potential problems')
+
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
 
