@@ -34,7 +34,16 @@ def test_capture_frame(data_collector_fixture):
     assert img.sum()
 
 
-def test_mock_data_collector(mock_data_collector_fixture):
+def test_mock_data_collector_capture_frame(mock_data_collector_fixture):
     mdc = mock_data_collector_fixture
     img = mdc.capture_frame()
     assert img.sum() == 309161381
+
+
+def test_sample_img_loader_fixture(sample_img_loader_fixture):
+    assert sample_img_loader_fixture.sum() == 314492527
+
+
+def test_sample_cropped_img_loader_fixture(sample_cropped_img_loader_fixture):
+    assert sample_cropped_img_loader_fixture.sum() == 72160725
+
