@@ -51,8 +51,3 @@ class DetectorBase:
         return sorted(dets, reverse=True, key=lambda x: x.score)
 
 
-
-
-7,578,240 bytes
-
-
