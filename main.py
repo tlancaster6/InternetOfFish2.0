@@ -10,6 +10,7 @@ from modules.object_detection import DetectorBase
 from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
 from modules.config_manager import ConfigManager
+import pause
 
 # establish a stable location within the filesystem
 FILE = pathlib.Path(__file__).resolve()
@@ -49,29 +50,27 @@ def main(project_id):
     picamera_kwargs = {'framerate': config.framerate, 'resolution': (config.h_resolution, config.v_resolution)}
 
     while True:
-        current_time = datetime.now().time()
-        if start_time < current_time < end_time:
+        current_datetime = datetime.now()
+        if start_time < current_datetime.time() < end_time:
             collector = DataCollector(video_dir, picamera_kwargs)
             roi_detector = DetectorBase(MODEL_DIR / config.roi_model, config.roi_confidence_thresh)
             ooi_detector = DetectorBase(MODEL_DIR / config.ooi_model, config.ooi_confidence_thresh)
             behavior_recognizer = BehaviorRecognizer()
             collector.start_recording()
 
-            next_video_split = (datetime.now() + video_split_interval).time().replace(minute=0, second=0, microsecond=0)
-            next_framegrab = (datetime.now() + framegrab_interval).time()
-            next_roi_update = (datetime.now() + roi_update_interval).time()
+            next_video_split = (current_datetime + video_split_interval).replace(minute=0, second=0, microsecond=0)
+            next_framegrab = current_datetime + framegrab_interval
+            next_roi_update = current_datetime + roi_update_interval
 
             roi_det, roi_slice = None, None
 
-            while start_time < current_time < end_time:
-                current_datetime = datetime.now()
-                current_time = current_datetime.time()
-                next_poll = (current_datetime + POLLING_INTERVAL).time()
-                if current_time >= next_video_split:
+            while start_time < current_datetime.time() < end_time:
+                next_poll = current_datetime + POLLING_INTERVAL
+                if current_datetime >= next_video_split:
                     collector.split_recording()
-                if current_time >= next_framegrab:
+                if current_datetime >= next_framegrab:
                     img = collector.capture_frame()
-                    if current_time >= next_roi_update:
+                    if current_datetime >= next_roi_update:
                         roi_det = roi_detector.detect(img)
                         if roi_det:
                             roi_slice = np.s_[roi_det[0].bbox.ymin:roi_det[0].bbox.ymax,
@@ -80,18 +79,18 @@ def main(project_id):
                         img = img[roi_slice]
                         ooi_dets = ooi_detector.detect(img)
                         behavior_recognizer.append_dets(ooi_dets)
+                pause.until(next_poll)
                 current_datetime = datetime.now()
-                current_time = current_datetime.time()
-                if current_time < next_poll:
             collector.stop_recording()
             roi_detector, ooi_detector, behavior_recognizer, collector = None, None, None, None
         else:
             uploader = Uploader(project_dir, config.cloud_data_dir, config.framerate)
             uploader.convert_and_upload()
-            while current_time > end_time or current_time < start_time:
-                current_time = datetime.now().time()
-                sleep(POLLING_INTERVAL)
-
+            current_datetime = datetime.now()
+            next_start = current_datetime.replace(hour=config.start_hour, minute=0, second=0, microsecond=0)
+            if current_datetime.time() > end_time:
+                next_start = next_start + timedelta(days=1)
+            pause.until(next_start)
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
