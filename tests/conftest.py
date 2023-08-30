@@ -2,11 +2,21 @@ import pytest
 import pathlib
 import shutil
 import cv2
+import sys
 from modules.data_collection import DataCollector
 from modules.object_detection import DetectorBase
 from tests.mocks import MockDataCollector
+import os
 
-TESTING_RESOURCE_DIR = pathlib.Path(__file__).resolve().parents[0] / 'resources'
+FILE = pathlib.Path(__file__).resolve()
+TESTING_DIR = FILE.parents[0]
+REPO_ROOT_DIR = TESTING_DIR.parents[0]  # repository root
+if str(REPO_ROOT_DIR) not in sys.path:
+    sys.path.append(str(REPO_ROOT_DIR))  # add REPO_ROOT_DIR to system path
+TESTING_RESOURCE_DIR = TESTING_DIR / 'resources'
+MODEL_DIR = REPO_ROOT_DIR / 'models'
+DATA_DIR = REPO_ROOT_DIR / 'projects'
+SENDGRID_CREDENTIAL_FILE = REPO_ROOT_DIR / 'credentials' / 'sendgrid_key.secret'
 
 
 @pytest.fixture

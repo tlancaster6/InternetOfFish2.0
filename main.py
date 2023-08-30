@@ -10,17 +10,18 @@ from modules.object_detection import DetectorBase
 from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
 from modules.config_manager import ConfigManager
+
 # establish a stable location within the filesystem
 FILE = pathlib.Path(__file__).resolve()
-LOCAL_ROOT = FILE.parents[0]  # repository root
-if str(LOCAL_ROOT) not in sys.path:
-    sys.path.append(str(LOCAL_ROOT))  # add LOCAL_ROOT to system path
-ROOT = pathlib.Path(os.path.relpath(LOCAL_ROOT, pathlib.Path.cwd()))  # relative to working directory
-MODEL_DIR = ROOT / 'models'
-DATA_DIR = ROOT / 'projects'
-SENDGRID_CREDENTIAL_FILE = ROOT / 'credentials' / 'sendgrid_key.secret'
+REPO_ROOT_DIR = FILE.parents[0]  # repository root
+if str(REPO_ROOT_DIR) not in sys.path:
+    sys.path.append(str(REPO_ROOT_DIR))  # add REPO_ROOT_DIR to system path
+# ROOT = pathlib.Path(os.path.relpath(REPO_ROOT_DIR, pathlib.Path.cwd()))  # relative to working directory
+MODEL_DIR = REPO_ROOT_DIR / 'models'
+DATA_DIR = REPO_ROOT_DIR / 'projects'
+SENDGRID_CREDENTIAL_FILE = REPO_ROOT_DIR / 'credentials' / 'sendgrid_key.secret'
 
-POLLING_INTERVAL = 0.01
+POLLING_INTERVAL = timedelta(seconds=0.01)
 
 
 def main(project_id):
@@ -32,7 +33,7 @@ def main(project_id):
         config_manager.generate_new_config(project_id)
         print('new project config generated. Edit this file if desired, then re-run main.py to \n'
               'initiate data collection. Note that, to enable email notifications and rclone uploads, \n'
-              'you must supply the "cloud_project_dir" and "user_email" fields manually in the config \n')
+              'you must supply the "cloud_data_dir" and "user_email" fields manually in the config \n')
 
         return
     config = config_manager.config_as_namespace()
@@ -63,7 +64,9 @@ def main(project_id):
             roi_det, roi_slice = None, None
 
             while start_time < current_time < end_time:
-                current_time = datetime.now().time()
+                current_datetime = datetime.now()
+                current_time = current_datetime.time()
+                next_poll = (current_datetime + POLLING_INTERVAL).time()
                 if current_time >= next_video_split:
                     collector.split_recording()
                 if current_time >= next_framegrab:
@@ -77,11 +80,13 @@ def main(project_id):
                         img = img[roi_slice]
                         ooi_dets = ooi_detector.detect(img)
                         behavior_recognizer.append_dets(ooi_dets)
-                sleep(POLLING_INTERVAL)
+                current_datetime = datetime.now()
+                current_time = current_datetime.time()
+                if current_time < next_poll:
             collector.stop_recording()
             roi_detector, ooi_detector, behavior_recognizer, collector = None, None, None, None
         else:
-            uploader = Uploader(project_dir, config.cloud_project_dir, config.framerate)
+            uploader = Uploader(project_dir, config.cloud_data_dir, config.framerate)
             uploader.convert_and_upload()
             while current_time > end_time or current_time < start_time:
                 current_time = datetime.now().time()

@@ -6,6 +6,15 @@ from types import SimpleNamespace
 class ConfigManager:
 
     def __init__(self, config_path):
+        """
+        class for reading and writing project configuration files
+        :param config_path: path to config file
+
+        description of config.yaml parameters:
+
+        project_id: unique name for project
+
+        """
         self.config_path = config_path
         if config_path.exists():
             self.load_config()
@@ -23,8 +32,10 @@ class ConfigManager:
     def generate_new_config(self, project_id):
         config = {
             'project_id': project_id,
-            'cloud_project_dir': None,   # cloud path, including the rclone remote, where the project will be stored
+            'cloud_data_dir': None,   # cloud path, including the rclone remote, where the project will be stored
             'user_email': None,
+            'min_notification_interval': 600,
+            'max_notifications_per_day': 20,
             'roi_model': 'roi.tflite',
             'ooi_model': 'ooi.tflite',
             'roi_confidence_thresh': 0.75,
