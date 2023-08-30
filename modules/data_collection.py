@@ -12,7 +12,7 @@ class DataCollector:
     def __init__(self, video_dir, picamera_kwargs=None):
         self.picamera_kwargs = picamera_kwargs
         self.video_dir = video_dir
-        self.video_dir.mkdir(exists_ok=True, parents=True)
+        self.video_dir.mkdir(exist_ok=True, parents=True)
         self.cam = self.init_camera(picamera_kwargs)
         self.resolution = self.cam.resolution
         logger.debug('DataCollector initialized')
