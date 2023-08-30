@@ -30,6 +30,8 @@ else:
     SENDGRID_KEY = None
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))
+if not LOG_DIR.exists():
+    LOG_DIR.mkdir()
 
 # initiate logger
 logger = logging.getLogger()
@@ -48,10 +50,10 @@ logger.addHandler(ch)
 def new_project(config_path):
     config_manager = ConfigManager(config_path)
     config_manager.generate_new_config()
-    print(f'new project config generated and saved to {config_path}. \n'
-          'Edit this file if desired, then re-run main.py to initiate data collection. Note that, to enable email \n'
-          'notifications and rclone uploads, you must supply the "cloud_data_dir" and "user_email" fields manually \n'
-          'in the config \n')
+    print(f'new project config generated and saved to {config_path}. '
+          'Edit this file if desired, then re-run main.py to initiate data collection. Note that, to enable email '
+          'notifications and rclone uploads, you must supply the "cloud_data_dir" and "user_email" fields manually '
+          'in the config ')
 
 
 class Runner:
