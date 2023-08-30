@@ -6,6 +6,7 @@ import datetime
 import cv2
 import logging
 logger = logging.getLogger(__name__)
+from time import sleep
 
 class DataCollector:
 
@@ -31,6 +32,7 @@ class DataCollector:
 
     def start_recording(self):
         self.cam.start_recording(str(self.generate_h264_path()))
+        sleep(2)
         logger.info('recording started')
 
     def split_recording(self):
