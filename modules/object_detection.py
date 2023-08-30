@@ -4,7 +4,8 @@ import cv2
 from pycoral.adapters import common
 from pycoral.adapters import detect
 from pycoral.utils.edgetpu import make_interpreter, run_inference
-
+import logging
+logger = logging.getLogger(__name__)
 
 class DetectorBase:
 
@@ -13,6 +14,7 @@ class DetectorBase:
         self.interpreter = make_interpreter(str(model_path))
         self.interpreter.allocate_tensors()
         self.input_size = common.input_size(self.interpreter)
+        logger.debug(f'DetectorBase initalized for {model_path.name}')
 
     def detect(self, img):
         scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])

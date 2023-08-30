@@ -5,17 +5,18 @@ import cv2
 import sys
 from modules.data_collection import DataCollector
 from modules.object_detection import DetectorBase
+from main import new_project
 from tests.mocks import MockDataCollector
 import os
 
 FILE = pathlib.Path(__file__).resolve()
-TESTING_DIR = FILE.parents[0]
-REPO_ROOT_DIR = TESTING_DIR.parents[0]  # repository root
+TESTING_DIR = FILE.parent
+REPO_ROOT_DIR = TESTING_DIR.parent  # repository root
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))  # add REPO_ROOT_DIR to system path
 TESTING_RESOURCE_DIR = TESTING_DIR / 'resources'
 MODEL_DIR = REPO_ROOT_DIR / 'models'
-DATA_DIR = REPO_ROOT_DIR / 'projects'
+DEFAULT_DATA_DIR = REPO_ROOT_DIR / 'projects'
 SENDGRID_CREDENTIAL_FILE = REPO_ROOT_DIR / 'credentials' / 'sendgrid_key.secret'
 
 
@@ -30,7 +31,7 @@ def tmp_dir_fixture():
 
 @pytest.fixture
 def data_collector_fixture(tmp_dir_fixture):
-    picamera_kwargs = {'framerate': 30, 'resolution': (1280, 976)}
+    picamera_kwargs = {'framerate': 30, 'resolution': (720, 900)}
     dc = DataCollector(tmp_dir_fixture, picamera_kwargs)
     yield dc
     dc.shutdown()
@@ -63,3 +64,15 @@ def roi_detector_fixture():
 @pytest.fixture
 def ooi_detector_fixture():
     yield DetectorBase(TESTING_RESOURCE_DIR / 'ooi.tflite')
+
+
+@pytest.fixture
+def tmp_project():
+    tmp_project_dir = DEFAULT_DATA_DIR / 'projects' / 'tmp_project'
+    config_path = tmp_project_dir / ('config.yaml')
+    new_project(config_path)
+    yield config_path
+    shutil.rmtree(tmp_project_dir, ignore_errors=True)
+
+
+

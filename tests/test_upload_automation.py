@@ -1,2 +1,2 @@
-def test_convert_h264s_to_mp4s():
+def test_convert_h264_to_mp4():
     pass

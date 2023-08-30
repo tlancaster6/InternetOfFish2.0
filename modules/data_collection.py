@@ -4,7 +4,8 @@ import picamera
 import numpy as np
 import datetime
 import cv2
-
+import logging
+logger = logging.getLogger(__name__)
 
 class DataCollector:
 
@@ -13,11 +14,15 @@ class DataCollector:
         self.video_dir = video_dir
         self.cam = self.init_camera(picamera_kwargs)
         self.resolution = self.cam.resolution
+        logger.debug('DataCollector initialized')
 
     def init_camera(self, picamera_kwargs):
         if picamera_kwargs:
-            return picamera.PiCamera(**picamera_kwargs)
-        return picamera.PiCamera()
+            cam = picamera.PiCamera(**picamera_kwargs)
+        else:
+            cam = picamera.PiCamera()
+        logger.info('camera initialized')
+        return cam
 
     def generate_h264_path(self):
         iso_string = datetime.datetime.now().isoformat(timespec='seconds').replace(':', '_')
@@ -25,12 +30,15 @@ class DataCollector:
 
     def start_recording(self):
         self.cam.start_recording(str(self.generate_h264_path()))
+        logger.info('recording started')
 
     def split_recording(self):
         self.cam.split_recording(str(self.generate_h264_path()))
+        logger.info('recording split')
 
     def stop_recording(self):
         self.cam.stop_recording()
+        logger.info('recording stopped')
 
     def capture_frame(self):
         image = np.zeros((self.resolution[1], self.resolution[0], 3), dtype=np.uint8)
@@ -38,5 +46,6 @@ class DataCollector:
         return image
 
     def shutdown(self):
+        self.stop_recording()
         self.cam.close()
-
+        logger.debug('DataCollector shutdown complete')

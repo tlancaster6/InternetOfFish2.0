@@ -2,10 +2,13 @@
 
 import yaml
 from types import SimpleNamespace
+import logging
+import pathlib
+logger = logging.getLogger(__name__)
 
 class ConfigManager:
 
-    def __init__(self, config_path):
+    def __init__(self, config_path: pathlib.Path):
         """
         class for reading and writing project configuration files
         :param config_path: path to config file
@@ -20,18 +23,22 @@ class ConfigManager:
             self.load_config()
         else:
             self.config = None
+        logger.debug('ConfigManager initialized')
 
     def load_config(self):
         with open(str(self.config_path), 'r') as f:
             self.config = yaml.load(f, yaml.FullLoader)
+        logger.debug('config loaded')
 
     def write_config(self):
+        self.config_path.parent.mkdir(exist_ok=True, parents=True)
         with open(str(self.config_path), 'w') as f:
             yaml.dump(self.config, f)
+        logger.debug(f'config written to {self.config_path}')
 
-    def generate_new_config(self, project_id):
+    def generate_new_config(self):
         config = {
-            'project_id': project_id,
+            'project_id': self.config_path.parent.name,
             'cloud_data_dir': None,   # cloud path, including the rclone remote, where the project will be stored
             'user_email': None,
             'min_notification_interval': 600,
@@ -51,6 +58,7 @@ class ConfigManager:
             'test': False
             }
         self.config = config
+        logger.debug('new config generated')
         self.write_config()
 
     def config_as_namespace(self):
