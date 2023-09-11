@@ -5,6 +5,7 @@ from pycoral.adapters import common
 from pycoral.adapters import detect
 from pycoral.utils.edgetpu import make_interpreter, run_inference
 import logging
+from time import perf_counter
 logger = logging.getLogger(__name__)
 
 class DetectorBase:
@@ -22,5 +23,24 @@ class DetectorBase:
         run_inference(self.interpreter, img.tobytes())
         dets = detect.get_objects(self.interpreter, self.confidence_thresh, scale)
         return sorted(dets, reverse=True, key=lambda x: x.score)
+
+    def _timed_detect(self, img):
+        times = {}
+
+        start = perf_counter()
+        img = cv2.resize(img, self.input_size)
+        times.update({'preprocessing': perf_counter() - start})
+
+        start = perf_counter()
+        run_inference(self.interpreter, img.tobytes())
+        times.update({'inference': perf_counter() - start})
+
+        start = perf_counter()
+        scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])
+        dets = detect.get_objects(self.interpreter, self.confidence_thresh, scale)
+        times.update({'postprocessing': perf_counter() - start})
+
+        return dets, times
+
 
 

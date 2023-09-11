@@ -3,6 +3,7 @@ import pathlib
 import sys
 import cv2
 from statistics import mean, median, stdev
+import json
 
 FILE = pathlib.Path(__file__).resolve()
 TESTING_DIR = FILE.parent
@@ -20,18 +21,15 @@ class BenchMarker:
         self.roid = DetectorBase(TESTING_RESOURCE_DIR / 'roi.tflite')
         self.ooid = DetectorBase(TESTING_RESOURCE_DIR / 'ooi.tflite')
         self.img_full, self.img_croppped = self.load_testing_images()
-        self.log_path = REPO_ROOT_DIR / 'logs' / 'benchmarking.log'
+        self.log_path = REPO_ROOT_DIR / 'logs' / 'benchmark_results.json'
 
     def run_benchmarks(self):
-        roi_det_metrics = self.time_roi_detection()
-        ooi_det_metrics = self.time_ooi_detection()
+        metrics = {}
+        metrics.update({'roi_det_metrics': self.time_roi_detection()})
+        metrics.update({'ooi_det_metrics': self.time_ooi_detection()})
         with open(str(self.log_path), 'w') as f:
-            f.write('roi detection benchmarking\n')
-            for k, v in roi_det_metrics.items():
-                f.write(f'\t{k}: {v})')
-            f.write('ooi detection benchmarking\n')
-            for k, v in ooi_det_metrics.items():
-                f.write(f'\t{k}: {v})')
+            json.dump(metrics, f)
+
 
     def load_testing_images(self):
         img_full = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR)
@@ -40,20 +38,23 @@ class BenchMarker:
 
     def _detection_benchmark(self, detector_object: DetectorBase, img, reps):
         print(f'timing detection for {reps} reps')
-        times = []
+        records = []
         for _ in range(reps):
-            start = perf_counter()
-            dets = detector_object.detect(img)
-            end = perf_counter()
-            times.append(end - start)
-        metrics = {
-            'mean': mean(times),
-            'median': median(times),
-            'min': min(times),
-            'max': max(times),
-            'stdev': stdev(times),
-            'n': reps
-        }
+            dets, times = detector_object._timed_detect(img)
+            records.append(times)
+
+        metrics = {}
+        for stage in ['preprocessing', 'inference', 'postprocessing']:
+            times = [rec[stage] for rec in records]
+            summary = {
+                'mean': mean(times),
+                'median': median(times),
+                'min': min(times),
+                'max': max(times),
+                'stdev': stdev(times),
+                'n': reps
+            }
+            metrics.update({stage: summary})
         return metrics
 
     def time_roi_detection(self, reps=500):
@@ -61,3 +62,13 @@ class BenchMarker:
 
     def time_ooi_detection(self, reps=500):
         return self._detection_benchmark(self.ooid, self.img_croppped, reps=reps)
+
+    def nesteddict_prettyprint(self, nested_dict):
+        def pretty(d, indent=0):
+            for key, value in d.items():
+
+                print('\t' * indent + str(key))
+                if isinstance(value, dict):
+                    pretty(value, indent + 1)
+                else:
+                    print('\t' * (indent + 1) + str(value))
