@@ -23,10 +23,10 @@ class BenchMarker:
         self.img_full, self.img_croppped = self.load_testing_images()
         self.log_path = REPO_ROOT_DIR / 'logs' / 'benchmark_results.json'
 
-    def run_benchmarks(self):
+    def run_benchmarks(self, reps=500):
         metrics = {}
-        metrics.update({'roi_det_metrics': self.time_roi_detection()})
-        metrics.update({'ooi_det_metrics': self.time_ooi_detection()})
+        metrics.update({'roi_det_metrics': self.time_roi_detection(reps=reps)})
+        metrics.update({'ooi_det_metrics': self.time_ooi_detection(reps=reps)})
         with open(str(self.log_path), 'w') as f:
             json.dump(metrics, f)
 
@@ -62,13 +62,3 @@ class BenchMarker:
 
     def time_ooi_detection(self, reps=500):
         return self._detection_benchmark(self.ooid, self.img_croppped, reps=reps)
-
-    def nesteddict_prettyprint(self, nested_dict):
-        def pretty(d, indent=0):
-            for key, value in d.items():
-
-                print('\t' * indent + str(key))
-                if isinstance(value, dict):
-                    pretty(value, indent + 1)
-                else:
-                    print('\t' * (indent + 1) + str(value))
