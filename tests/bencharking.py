@@ -34,7 +34,7 @@ class BenchMarker:
         img_cropped = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR)
         return [cv2.cvtColor(img, cv2.COLOR_BGR2RGB) for img in [img_full, img_cropped]]
 
-    def time_roi_detection(self, reps=50):
+    def time_roi_detection(self, reps=500):
         print(f'timing region-of-interest detection for {reps} reps')
         start = perf_counter()
         for _ in range(reps):
@@ -43,7 +43,7 @@ class BenchMarker:
         det_time = (end - start) / reps
         return det_time
 
-    def time_ooi_detection(self, reps=50):
+    def time_ooi_detection(self, reps=500):
         print(f'timing object-of-interest detection for {reps} reps')
         start = perf_counter()
         for _ in range(reps):
