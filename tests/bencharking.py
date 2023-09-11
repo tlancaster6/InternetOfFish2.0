@@ -1,4 +1,3 @@
-from modules.object_detection import DetectorBase
 from time import perf_counter
 import pathlib
 import sys
@@ -10,6 +9,9 @@ REPO_ROOT_DIR = TESTING_DIR.parent  # repository root
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))  # add REPO_ROOT_DIR to system path
 TESTING_RESOURCE_DIR = TESTING_DIR / 'resources'
+
+from modules.object_detection import DetectorBase
+
 
 class BenchMarker:
 
