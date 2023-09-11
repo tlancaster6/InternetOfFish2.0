@@ -47,6 +47,10 @@ class ConfigManager:
             'ooi_model': 'ooi.tflite',
             'roi_confidence_thresh': 0.75,
             'ooi_confidence_thresh': 0.25,
+            'behavior_check_window': 60,
+            'behavior_check_interval': 30,  # seconds between behavior checks
+            'behavior_min_individuals_roi': 2,   # min number of individuals in ROI during behavior event
+            'behavior_max_individuals_roi': 2,   # max number of individuals in ROI during behavior event
             'framerate': 30,
             'h_resolution': 1280,
             'v_resolution': 720,
