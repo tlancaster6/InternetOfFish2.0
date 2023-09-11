@@ -2,7 +2,6 @@ from time import perf_counter
 import pathlib
 import sys
 import cv2
-import pandas as pd
 from statistics import mean, median, stdev
 
 FILE = pathlib.Path(__file__).resolve()
@@ -24,18 +23,22 @@ class BenchMarker:
         self.log_path = REPO_ROOT_DIR / 'logs' / 'benchmarking.log'
 
     def run_benchmarks(self):
-
         roi_det_metrics = self.time_roi_detection()
         ooi_det_metrics = self.time_ooi_detection()
-        df = pd.DataFrame.from_records([roi_det_metrics, ooi_det_metrics])
-        df.to_csv(str(self.log_path))
+        with open(str(self.log_path), 'w') as f:
+            f.write('roi detection benchmarking\n')
+            for k, v in roi_det_metrics.items():
+                f.write(f'\t{k}: {v})')
+            f.write('ooi detection benchmarking\n')
+            for k, v in ooi_det_metrics.items():
+                f.write(f'\t{k}: {v})')
 
     def load_testing_images(self):
         img_full = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR)
         img_cropped = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR)
         return [cv2.cvtColor(img, cv2.COLOR_BGR2RGB) for img in [img_full, img_cropped]]
 
-    def _detection_benchmark(self, identifier, detector_object: DetectorBase, img, reps):
+    def _detection_benchmark(self, detector_object: DetectorBase, img, reps):
         print(f'timing detection for {reps} reps')
         times = []
         for _ in range(reps):
@@ -44,7 +47,6 @@ class BenchMarker:
             end = perf_counter()
             times.append(end - start)
         metrics = {
-            'identifier': identifier,
             'mean': mean(times),
             'median': median(times),
             'min': min(times),
@@ -55,7 +57,7 @@ class BenchMarker:
         return metrics
 
     def time_roi_detection(self, reps=500):
-        return self._detection_benchmark('roi_det_time', self.roid, self.img_full)
+        return self._detection_benchmark(self.roid, self.img_full, reps=reps)
 
     def time_ooi_detection(self, reps=500):
-        return self._detection_benchmark('ooi_det_time', self.ooid, self.img_croppped)
+        return self._detection_benchmark(self.ooid, self.img_croppped, reps=reps)
