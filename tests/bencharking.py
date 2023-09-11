@@ -1,7 +1,16 @@
-from conftest import TESTING_RESOURCE_DIR, REPO_ROOT_DIR
 from modules.object_detection import DetectorBase
 from time import perf_counter
+import pathlib
+import sys
 import cv2
+
+FILE = pathlib.Path(__file__).resolve()
+TESTING_DIR = FILE.parent
+REPO_ROOT_DIR = TESTING_DIR.parent  # repository root
+if str(REPO_ROOT_DIR) not in sys.path:
+    sys.path.append(str(REPO_ROOT_DIR))  # add REPO_ROOT_DIR to system path
+TESTING_RESOURCE_DIR = TESTING_DIR / 'resources'
+
 class BenchMarker:
 
     def __init__(self):
