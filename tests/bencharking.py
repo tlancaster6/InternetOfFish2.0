@@ -19,7 +19,7 @@ class BenchMarker:
         self.roid = DetectorBase(TESTING_RESOURCE_DIR / 'roi.tflite')
         self.ooid = DetectorBase(TESTING_RESOURCE_DIR / 'ooi.tflite')
         self.img_full, self.img_croppped = self.load_testing_images()
-        self.log_path = REPO_ROOT_DIR / 'benchmarking.log'
+        self.log_path = REPO_ROOT_DIR / 'logs' / 'benchmarking.log'
 
     def run_benchmarks(self):
         metrics = {}
@@ -27,7 +27,7 @@ class BenchMarker:
         metrics.update({'ooi_det_time': self.time_ooi_detection()})
         with open(str(self.log_path), 'w') as f:
             for key, val in metrics.items():
-                f.write(f'{key}: val')
+                f.write(f'{key}: {val}\n')
 
     def load_testing_images(self):
         img_full = cv2.imread(str(TESTING_RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR)
