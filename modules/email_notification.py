@@ -13,6 +13,7 @@ class Notifier:
         self.user_email, self.api_key = user_email, api_key
         self.min_notification_interval = min_notification_interval
         self.max_notifications_per_day = max_notifications_per_day
+        self.notification_count = 0
         logger.debug('Notifier initialized')
 
     def send_email(self):
@@ -20,3 +21,8 @@ class Notifier:
 
     def check_conditions(self):
         logger.debug('checking notification conditions')
+
+    def reset(self):
+        if self.notification_count >= self.max_notifications_per_day:
+
+

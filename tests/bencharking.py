@@ -28,7 +28,7 @@ class BenchMarker:
         metrics.update({'roi_det_metrics': self.time_roi_detection(reps=reps)})
         metrics.update({'ooi_det_metrics': self.time_ooi_detection(reps=reps)})
         with open(str(self.log_path), 'w') as f:
-            json.dump(metrics, f)
+            json.dump(metrics, f, indent=4)
 
 
     def load_testing_images(self):
