@@ -17,3 +17,6 @@ class Notifier:
 
     def send_email(self):
         pass
+
+    def check_conditions(self):
+        logger.debug('checking notification conditions')
