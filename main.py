@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, time
 import numpy as np
 import pause
 import logging
+import cv2
 from logging.handlers import RotatingFileHandler
 
 from modules.data_collection import DataCollector
@@ -12,7 +13,7 @@ from modules.object_detection import DetectorBase
 from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
 from modules.config_manager import ConfigManager
-from modules.email_notification import Notifier
+from modules.email_notification import Notifier, Notification
 
 
 # establish filesystem locations
@@ -21,13 +22,6 @@ REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
 DEFAULT_DATA_DIR = REPO_ROOT_DIR / 'projects'
 LOG_DIR = REPO_ROOT_DIR / 'logs'
-CREDENTIAL_DIR = REPO_ROOT_DIR / 'credentials'
-SENDGRID_KEY_FILE = CREDENTIAL_DIR / 'sendgrid_key.secret'
-if SENDGRID_KEY_FILE.exists():
-    with open(SENDGRID_KEY_FILE, 'r') as f:
-        SENDGRID_KEY = f.read().strip()
-else:
-    SENDGRID_KEY = None
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))
 if not LOG_DIR.exists():
@@ -66,6 +60,7 @@ class Runner:
         self.end_time = time(hour=self.config.end_hour)
         self.roi_update_interval = timedelta(seconds=self.config.roi_update_interval)
         self.framegrab_interval = timedelta(seconds=self.config.framegrab_interval)
+        self.behavior_check_interval = timedelta(seconds=self.config.behavior_check_interval)
         self.video_split_interval = timedelta(hours=self.config.video_split_hours)
         self.picamera_kwargs = {'framerate': self.config.framerate,
                                 'resolution': (self.config.h_resolution, self.config.v_resolution)}
@@ -73,7 +68,7 @@ class Runner:
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
         self.behavior_recognizer = BehaviorRecognizer()
-        self.notifier = Notifier(self.config.user_email, SENDGRID_KEY)
+        self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
         logger.debug('runner initiated')
 
@@ -90,6 +85,7 @@ class Runner:
         current_datetime = datetime.now()
         next_video_split = (current_datetime + self.video_split_interval).replace(minute=0, second=0, microsecond=0)
         next_roi_update = current_datetime
+        next_behavior_check = current_datetime + self.behavior_check_interval
         roi_det, roi_slice = None, None
 
         while self.start_time < current_datetime.time() < self.end_time:
@@ -103,13 +99,24 @@ class Runner:
                     next_roi_update = current_datetime + self.roi_update_interval
             if roi_slice:
                 img = img[roi_slice]
-                ooi_dets = self.ooi_detector.detect(img)
-                self.behavior_recognizer.append_dets(ooi_dets)
+                occupancy = len(self.ooi_detector.detect(img))
+                thumbnail = cv2.resize(img, (img.shape[1]//10, img.shape[0]//10))
+                self.behavior_recognizer.append_data(occupancy, thumbnail)
+            if current_datetime >= next_behavior_check:
+                if self.behavior_recognizer.check_for_behavior():
+                    # TODO: fill in placeholder attachment path and message
+                    mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}'
+                    self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
+                    notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
+                                                message='',
+                                                attachment_path=str(mp4_path))
+                    self.notifier.send_email(notification)
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
             pause.until(next_framegrab)
             current_datetime = datetime.now()
         self.collector.stop_recording()
+        self.notifier.reset()
 
     def passive_mode(self):
         logger.info('entering passive upload mode')

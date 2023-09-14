@@ -41,6 +41,8 @@ class ConfigManager:
             'project_id': self.config_path.parent.name,
             'cloud_data_dir': None,   # cloud path, including the rclone remote, where the project will be stored
             'user_email': None,
+            'sendgrid_api_key': None,
+            'sendgrid_from_email': None,
             'min_notification_interval': 600,
             'max_notifications_per_day': 20,
             'roi_model': 'roi.tflite',
