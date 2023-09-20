@@ -95,7 +95,11 @@ class ParameterSweeper:
     def convert_to_occupancy(self, confidence_thresh):
         df = self.data[self.data.score >= confidence_thresh]
         occ = df.groupby(level=[0, 1]).size()
+        occ.name = 'occupancy'
         spawning = df.groupby(level=[0, 1]).spawning.last()
+        df = pd.concat([occ, spawning], axis=1)
+        return df
+
 
     def baseline(self, confidence_thresh):
 
