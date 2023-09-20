@@ -14,6 +14,7 @@ if str(REPO_ROOT_DIR) not in sys.path:
 TESTING_RESOURCE_DIR = TESTING_DIR / 'resources'
 
 from modules.object_detection import DetectorBase
+from modules.behavior_recognition import BehaviorRecognizer
 
 
 def generate_dense_detection_data(video_path: pathlib.Path):
@@ -84,4 +85,18 @@ class SpeedBenchMarker:
 
     def time_ooi_detection(self, reps=500):
         return self._detection_benchmark(self.ooid, self.img_croppped, reps=reps)
+
+class ParameterSweeper:
+
+    def __init__(self, data_path):
+        self.data = pd.read_csv(data_path)
+        clip_names = self.data.index.get_level_values(0).unique()
+
+    def convert_to_occupancy(self, confidence_thresh):
+        df = self.data[self.data.score >= confidence_thresh]
+        occ = df.groupby(level=[0, 1]).size()
+        spawning = df.groupby(level=[0, 1]).spawning.last()
+
+    def baseline(self, confidence_thresh):
+
 

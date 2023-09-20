@@ -1,6 +1,8 @@
 """code for defining a relationship between object detection data and one or more behaviors of interest"""
 import logging
 import cv2
+import numpy as np
+from dbscan1d import DBSCAN1D
 logger = logging.getLogger(__name__)
 
 class BehaviorRecognizer:
@@ -11,6 +13,8 @@ class BehaviorRecognizer:
         self.data_buffer_length = self.behavior_check_window // config.framegrab_interval
         self.min_individuals_roi = config.behavior_min_individuals_roi
         self.max_individuals_roi = config.behavior_max_individuals_roi
+        self.eps = config.behavior_max_gap_within_event / config.framegrab_interval
+        self.min_samples = config.behavior_min_event_length // config.framegrab_interval
         self.data_buffer = []
         logger.debug('BehaviorRecognizer initialized')
 
@@ -22,6 +26,10 @@ class BehaviorRecognizer:
     def check_for_behavior(self):
         if len(self.data_buffer) < self.behavior_check_window:
             return
+        occupancies = np.array([x[0] for x in self.data_buffer])
+        in_range_indices = np.where((occupancies >= self.min_individuals_roi) & (occupancies <= self.max_individuals_roi))
+
+
 
     def thumbnails_to_mp4(self, output_path):
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')

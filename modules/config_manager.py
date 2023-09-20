@@ -49,10 +49,12 @@ class ConfigManager:
             'ooi_model': 'ooi.tflite',
             'roi_confidence_thresh': 0.75,
             'ooi_confidence_thresh': 0.25,
-            'behavior_check_window': 60,
-            'behavior_check_interval': 30,  # seconds between behavior checks
+            'behavior_check_window': 60,         # length of the window analyzed (in seconds) at each behavior check
+            'behavior_check_interval': 30,       # seconds between behavior checks
             'behavior_min_individuals_roi': 2,   # min number of individuals in ROI during behavior event
             'behavior_max_individuals_roi': 2,   # max number of individuals in ROI during behavior event
+            'behavior_max_gap_within_event': 15, # maximum allowable gap (in seconds) within a valid behavioral event
+            'behavior_min_event_length': 15,     # minimum duration (in seconds) or a valid behavioral event
             'framerate': 30,
             'h_resolution': 1280,
             'v_resolution': 720,
