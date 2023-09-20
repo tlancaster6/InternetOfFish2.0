@@ -16,6 +16,27 @@ TESTING_RESOURCE_DIR = TESTING_DIR / 'resources'
 from modules.object_detection import DetectorBase
 
 
+def generate_dense_detection_data(video_path: pathlib.Path):
+    print(f'processing {video_path.name}')
+    roid = DetectorBase(TESTING_RESOURCE_DIR / 'roi.tflite', confidence_thresh=0.1)
+    cap = cv2.VideoCapture(str(video_path))
+    current_frame = 0
+    rows = []
+    columns = ['frame', 'xmin', 'xmax', 'ymin', 'ymax', 'score']
+    while True:
+        ret, img = cap.read()
+        if not ret:
+            break
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        dets = roid.detect(img)
+        for det in dets:
+            rows.append([current_frame, det.bbox.xmin, det.bbox.xmax, det.bbox.ymin, det.bbox.ymax, det.score])
+        current_frame += 1
+    cap.release()
+    df = pd.DataFrame(rows, columns=columns).set_index('frame')
+    df.to_csv(str(video_path.with_suffix('.csv')))
+
+
 class SpeedBenchMarker:
 
     def __init__(self):
@@ -63,33 +84,4 @@ class SpeedBenchMarker:
 
     def time_ooi_detection(self, reps=500):
         return self._detection_benchmark(self.ooid, self.img_croppped, reps=reps)
-
-
-class AccuracyBenchMarker:
-
-    def __init__(self, video_path):
-        self.roid = DetectorBase(TESTING_RESOURCE_DIR / 'roi.tflite', confidence_thresh=0.1)
-        self.video_path = pathlib.Path(video_path)
-        self.output_path = self.video_path.with_suffix('.csv')
-
-    def run_detection(self):
-        cap = cv2.VideoCapture(str(self.video_path))
-        ret = True
-        current_frame = 0
-        rows = []
-        columns = ['frame', 'xmin', 'xmax', 'ymin', 'ymax', 'score']
-        while ret:
-            ret, img = cap.read()
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            dets = self.roid.detect(img)
-            for det in dets:
-                rows.append([current_frame, det.bbox.xmin, det.bbox.xmax, det.bbox.ymin, det.bbox.ymax, det.score])
-            current_frame += 1
-        cap.release()
-        df = pd.DataFrame(rows, columns=columns).set_index('frame')
-        df.to_csv(str(self.output_path))
-
-
-
-
 
