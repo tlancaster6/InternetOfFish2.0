@@ -52,9 +52,11 @@ class ConfigManager:
             'behavior_check_window': 60,         # length of the window analyzed (in seconds) at each behavior check
             'behavior_check_interval': 30,       # seconds between behavior checks
             'behavior_min_individuals_roi': 2,   # min number of individuals in ROI during behavior event
-            'behavior_max_individuals_roi': 2,   # max number of individuals in ROI during behavior event
-            'behavior_max_gap_within_event': 15, # maximum allowable gap (in seconds) within a valid behavioral event
-            'behavior_min_event_length': 15,     # minimum duration (in seconds) or a valid behavioral event
+            'behavior_max_individuals_roi': 3,   # max number of individuals in ROI during behavior event
+            'behavior_use_dbscan': True,        # whether to use DBSCAN clustering to denoise data
+            'behavior_max_gap_within_event': 1, # maximum allowable gap (in seconds) within a valid DBSCAN cluster
+            'behavior_min_event_length': 5,     # minimum duration (in seconds) of a valid DBSCAN cluster
+            'behavior_min_fraction_for_notification': 0.25,
             'framerate': 30,
             'h_resolution': 1280,
             'v_resolution': 720,
