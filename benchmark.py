@@ -21,20 +21,13 @@ if not LOG_DIR.exists():
 class BenchMarker:
 
     def __init__(self):
-        self.ooid = DetectorBase(MODEL_DIR / 'ooi.tflite')
-        # self.roid = DetectorBase(model_dir / 'roi.tflite')
-        self.cropped_sample_img = self.load_sample_img()
+        pass
 
-    def load_sample_img(self):
-        cropped_img = cv2.imread(str(RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR)
-        # full_img = cv2.imread(str(RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR)
-        return cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
-
-    def benchmark_speed(self, reps=500):
+    def benchmark_detection_speed(self, detector_object, img,  reps=500):
         print(f'timing detection for {reps} reps')
         records = []
         for _ in range(reps):
-            dets, times = self.ooid._timed_detect(self.cropped_sample_img)
+            dets, times = detector_object._timed_detect(img)
             records.append(times)
 
         metrics = []
@@ -49,5 +42,16 @@ class BenchMarker:
                 [stage, 'n', reps]
             ])
         metrics = pd.DataFrame(metrics, columns=['stage', 'metric', 'value'])
-        metrics.to_csv(str(LOG_DIR / 'speed_benchmark.log'))
         return metrics
+
+    def benchmark_roid_speed(self):
+        roid = DetectorBase(MODEL_DIR / 'roi.tflite')
+        img = cv2.cvtColor(cv2.imread(str(RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
+        metrics = self.benchmark_detection_speed(roid, img, self)
+        metrics.to_csv(str(LOG_DIR / 'roi_speed_benchmark.log'))
+
+    def benchmark_ooid_speed(self):
+        ooid = DetectorBase(MODEL_DIR / 'ooi.tflite')
+        img = cv2.cvtColor(cv2.imread(str(RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
+        metrics = self.benchmark_detection_speed(ooid, img, self)
+        metrics.to_csv(str(LOG_DIR / 'ooi_speed_benchmark.log'))
