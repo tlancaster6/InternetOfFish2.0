@@ -29,10 +29,11 @@ class DetectorBase:
 
         start = perf_counter()
         img = cv2.resize(img, self.input_size)
+        byte_img = img.tobytes()
         times.update({'preprocessing': perf_counter() - start})
 
         start = perf_counter()
-        run_inference(self.interpreter, img.tobytes())
+        run_inference(self.interpreter, byte_img)
         times.update({'inference': perf_counter() - start})
 
         start = perf_counter()

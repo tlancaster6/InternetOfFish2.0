@@ -135,7 +135,8 @@ def parse_opt(known=False):
     parser.add_argument('--project_id', '--pid',
                         type=str,
                         help='Unique project id. If a project with that ID exists, data collection will begin.'
-                             'Otherwise, a new project with that ID will be created and the program will exit.',
+                             'Otherwise, a new project with that ID will be created and the program will exit so that'
+                             'you can edit the default config.yaml file if necessary.',
                         default=None)
 
     # parser.add_argument('--test',
