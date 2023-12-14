@@ -47,11 +47,11 @@ class BenchMarker:
     def benchmark_roid_speed(self):
         roid = DetectorBase(MODEL_DIR / 'roi.tflite')
         img = cv2.cvtColor(cv2.imread(str(RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
-        metrics = self.benchmark_detection_speed(roid, img, self)
+        metrics = self.benchmark_detection_speed(roid, img)
         metrics.to_csv(str(LOG_DIR / 'roi_speed_benchmark.log'))
 
     def benchmark_ooid_speed(self):
         ooid = DetectorBase(MODEL_DIR / 'ooi.tflite')
         img = cv2.cvtColor(cv2.imread(str(RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
-        metrics = self.benchmark_detection_speed(ooid, img, self)
+        metrics = self.benchmark_detection_speed(ooid, img)
         metrics.to_csv(str(LOG_DIR / 'ooi_speed_benchmark.log'))
