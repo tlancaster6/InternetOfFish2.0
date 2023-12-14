@@ -22,17 +22,19 @@ class BenchMarker:
 
     def __init__(self):
         self.ooid = DetectorBase(MODEL_DIR / 'ooi.tflite')
-        self.sample_img = self.load_sample_img()
+        # self.roid = DetectorBase(model_dir / 'roi.tflite')
+        self.cropped_sample_img = self.load_sample_img()
 
     def load_sample_img(self):
-        img = cv2.imread(str(RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR)
-        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cropped_img = cv2.imread(str(RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR)
+        # full_img = cv2.imread(str(RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR)
+        return cv2.cvtColor(cropped_img, cv2.COLOR_BGR2RGB)
 
     def benchmark_speed(self, reps=500):
         print(f'timing detection for {reps} reps')
         records = []
         for _ in range(reps):
-            dets, times = self.ooid._timed_detect(self.sample_img)
+            dets, times = self.ooid._timed_detect(self.cropped_sample_img)
             records.append(times)
 
         metrics = []
