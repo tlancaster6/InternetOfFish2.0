@@ -22,8 +22,8 @@ if not LOG_DIR.exists():
 
 class BenchMarker:
 
-    def __init__(self):
-        pass
+    def __init__(self, model_id='effdet0_fish'):
+        self.model_id = model_id
 
     def benchmark_detection_speed(self, detector_object, img,  reps=500):
         print(f'timing detection for {reps} reps')
@@ -47,16 +47,16 @@ class BenchMarker:
         return metrics
 
     def benchmark_roid_speed(self):
-        roid = DetectorBase(MODEL_DIR / 'roi.tflite')
+        roid = DetectorBase(MODEL_DIR / self.model_id / 'roi.tflite')
         img = cv2.cvtColor(cv2.imread(str(RESOURCE_DIR / 'sample_image.png'), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
         metrics = self.benchmark_detection_speed(roid, img)
-        metrics.to_csv(str(LOG_DIR / 'roi_speed_benchmark.log'))
+        metrics.to_csv(str(LOG_DIR / self.model_id / 'roi_speed_benchmark.log'))
 
     def benchmark_ooid_speed(self):
-        ooid = DetectorBase(MODEL_DIR / 'ooi.tflite')
+        ooid = DetectorBase(MODEL_DIR / self.model_id / 'ooi.tflite')
         img = cv2.cvtColor(cv2.imread(str(RESOURCE_DIR / 'sample_image_cropped.png'), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
         metrics = self.benchmark_detection_speed(ooid, img)
-        metrics.to_csv(str(LOG_DIR / 'ooi_speed_benchmark.log'))
+        metrics.to_csv(str(LOG_DIR / self.model_id / 'ooi_speed_benchmark.log'))
 
     def realistic_benchmark(self):
         # set up the test
@@ -74,8 +74,8 @@ class BenchMarker:
                 frame_counter += 1
             else:
                 break
-        roid = DetectorBase(MODEL_DIR / 'roi.tflite')
-        ooid = DetectorBase(MODEL_DIR / 'ooi.tflite')
+        roid = DetectorBase(MODEL_DIR / self.model_id / 'roi.tflite')
+        ooid = DetectorBase(MODEL_DIR / self.model_id / 'ooi.tflite')
 
         # run roi detection
         img = cv2.cvtColor(cv2.imread(str(img_paths[0]), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
@@ -100,8 +100,8 @@ class BenchMarker:
                 [stage, 'stdev', stdev(times)],
             ])
         ooid_metrics = pd.DataFrame(ooid_metrics, columns=['stage', 'metric', 'value'])
-        ooid_metrics.to_csv(str(LOG_DIR / 'ooi_speed_benchmark2.log'))
-        roid_metrics.to_csv(str(LOG_DIR / 'roi_speed_benchmark2.log'))
+        ooid_metrics.to_csv(str(LOG_DIR / self.model_id / 'ooi_speed_benchmark2.log'))
+        roid_metrics.to_csv(str(LOG_DIR / self.model_id / 'roi_speed_benchmark2.log'))
 
         # clean up
         shutil.rmtree(tmp_dir)
