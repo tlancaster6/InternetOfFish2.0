@@ -24,6 +24,8 @@ class BenchMarker:
 
     def __init__(self, model_id='effdet0_fish'):
         self.model_id = model_id
+        if not (LOG_DIR / model_id).exists():
+            (LOG_DIR / model_id).mkdir()
 
     def run_all_benchmarks(self):
         print('benchmarking ooi detection speed')
