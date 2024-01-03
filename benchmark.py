@@ -25,6 +25,16 @@ class BenchMarker:
     def __init__(self, model_id='effdet0_fish'):
         self.model_id = model_id
 
+    def run_all_benchmarks(self):
+        print('benchmarking ooi detection speed')
+        self.benchmark_ooid_speed()
+        print('benchmarking roi detection speed')
+        self.benchmark_roid_speed()
+        print('benchmarking ooi and roi detection under realistic operating conditions')
+        self.realistic_benchmark()
+        print('done')
+
+
     def benchmark_detection_speed(self, detector_object, img,  reps=500):
         print(f'timing detection for {reps} reps')
         records = []

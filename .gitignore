@@ -1,7 +1,7 @@
 # repo specific
 projects/*
 !projects/sample
-scratch.py
+#scratch.py
 *.secret
 
 # Byte-compiled / optimized / DLL files
