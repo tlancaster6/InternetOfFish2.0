@@ -6,6 +6,7 @@ import shutil
 from statistics import mean, median, stdev
 import pandas as pd
 from modules.object_detection import DetectorBase
+from modules.utils import generate_dense_detection_data
 import numpy as np
 import xml.etree.ElementTree as ET
 # establish filesystem locations
@@ -145,8 +146,14 @@ class BenchMarker:
                             'accuracy': accuracy,
                             'rms_error': rms_error,
                             'avg_signed_error': avg_signed_error})
-        output.to_csv(str(LOG_DIR / 'occupancy_accuracy.log'))
+        output.to_csv(str(LOG_DIR / self.model_id / 'occupancy_accuracy.log'))
 
+    def generate_dense_detection_data(self, parent_dir):
+        vid_paths = pathlib.Path(parent_dir).glob('**/*.mp4')
+        for vp in vid_paths:
+            print(f'generating dense detection data for {vp.name}')
+            generate_dense_detection_data(vp, self.model_id)
+        print('Done')
 
 
 

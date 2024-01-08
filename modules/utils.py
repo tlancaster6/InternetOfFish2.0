@@ -14,9 +14,9 @@ if str(REPO_ROOT_DIR) not in sys.path:
 from modules.object_detection import DetectorBase
 
 
-def generate_dense_detection_data(video_path: pathlib.Path):
+def generate_dense_detection_data(video_path: pathlib.Path, model_id: str):
     print(f'processing {video_path.name}')
-    ooid = DetectorBase(MODEL_DIR / 'ooi.tflite', confidence_thresh=0.1)
+    ooid = DetectorBase(MODEL_DIR / model_id / 'ooi.tflite', confidence_thresh=0.1)
     cap = cv2.VideoCapture(str(video_path))
     current_frame = 0
     rows = []
