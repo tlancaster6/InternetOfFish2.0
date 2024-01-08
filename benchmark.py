@@ -129,7 +129,10 @@ class BenchMarker:
         n_correct = 0
         for ip in img_paths:
             xml_path = ip.with_suffix('.xml')
-            n_fish_actual = len(ET.parse(str(xml_path)).getroot().findall('./object'))
+            try:
+                n_fish_actual = len(ET.parse(str(xml_path)).getroot().findall('./object'))
+            except Exception as e:
+                print(f'failed on {xml_path}')
             img = cv2.cvtColor(cv2.imread(str(ip), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
             n_fish_pred = [x for x in ooid.detect(img) if x.score >= conf_thresh]
             if n_fish_pred == n_fish_actual:
