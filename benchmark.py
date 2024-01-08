@@ -7,6 +7,7 @@ from statistics import mean, median, stdev
 import pandas as pd
 from modules.object_detection import DetectorBase
 import numpy as np
+import xml.etree.ElementTree as ET
 # establish filesystem locations
 FILE = pathlib.Path(__file__).resolve()
 REPO_ROOT_DIR = FILE.parent  # repository root
@@ -117,3 +118,33 @@ class BenchMarker:
 
         # clean up
         shutil.rmtree(tmp_dir)
+
+    def test_occupancy_accuracy(self, test_data_dir, conf_thresh=0.5):
+        test_data_dir = pathlib.Path(test_data_dir)
+        if not test_data_dir.exists():
+            print('cannot locate data for occupancy accuracy testing')
+            return
+        ooid = DetectorBase(MODEL_DIR / self.model_id / 'ooi.tflite')
+        img_paths = list(test_data_dir.glob('*.jpg'))
+        n_correct = 0
+        for ip in img_paths:
+            xml_path = ip.with_suffix('.xml')
+            n_fish_actual = len(ET.parse(str(xml_path)).getroot().findall('./object'))
+            img = cv2.cvtColor(cv2.imread(str(ip), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
+            n_fish_pred = [x for x in ooid.detect(img) if x.score >= conf_thresh]
+            if n_fish_pred == n_fish_actual:
+                n_correct += 1
+        accuracy = n_correct / len(img_paths)
+        output = pd.Series({'conf_thresh': conf_thresh, 'accuracy': accuracy})
+        output.to_csv(str(LOG_DIR / 'occupancy_accuracy.log'))
+
+
+
+
+
+
+
+
+
+
+
