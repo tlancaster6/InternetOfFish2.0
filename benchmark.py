@@ -136,6 +136,8 @@ class BenchMarker:
             if n_fish_pred == n_fish_actual:
                 n_correct += 1
                 total_squared_error += (n_fish_pred - n_fish_actual) ** 2
+            else:
+                print(f'{n_fish_pred} predicted, {n_fish_actual} actual')
         accuracy = n_correct / len(img_paths)
         rms_error = (total_squared_error / len(img_paths)) ** 0.5
         output = pd.Series({'conf_thresh': conf_thresh, 'accuracy': accuracy, 'rms_error': rms_error})
