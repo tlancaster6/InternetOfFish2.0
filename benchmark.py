@@ -131,7 +131,7 @@ class BenchMarker:
             xml_path = ip.with_suffix('.xml')
             n_fish_actual = len(ET.parse(str(xml_path)).getroot().findall('./object'))
             img = cv2.cvtColor(cv2.imread(str(ip), cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
-            n_fish_pred = [x for x in ooid.detect(img) if x.score >= conf_thresh]
+            n_fish_pred = len([x for x in ooid.detect(img) if x.score >= conf_thresh])
             if n_fish_pred == n_fish_actual:
                 n_correct += 1
         accuracy = n_correct / len(img_paths)
