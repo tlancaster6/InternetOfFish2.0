@@ -127,7 +127,7 @@ class BenchMarker:
         ooid = DetectorBase(MODEL_DIR / self.model_id / 'ooi.tflite')
         img_paths = list(test_data_dir.glob('*.jpg'))
         n_correct = 0
-        total_error = 0
+        total_squared_error = 0
         for ip in img_paths:
             xml_path = ip.with_suffix('.xml')
             n_fish_actual = len(ET.parse(str(xml_path)).getroot().findall('./object'))
@@ -135,10 +135,10 @@ class BenchMarker:
             n_fish_pred = len([x for x in ooid.detect(img) if x.score >= conf_thresh])
             if n_fish_pred == n_fish_actual:
                 n_correct += 1
-                total_error += (n_fish_pred - n_fish_actual)
+                total_squared_error += (n_fish_pred - n_fish_actual) ** 2
         accuracy = n_correct / len(img_paths)
-        avg_error = total_error / len(img_paths)
-        output = pd.Series({'conf_thresh': conf_thresh, 'accuracy': accuracy, 'avg_error': avg_error})
+        rms_error = (total_squared_error / len(img_paths)) ** 0.5
+        output = pd.Series({'conf_thresh': conf_thresh, 'accuracy': accuracy, 'rms_error': rms_error})
         output.to_csv(str(LOG_DIR / 'occupancy_accuracy.log'))
 
 
