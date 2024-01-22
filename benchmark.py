@@ -177,11 +177,11 @@ class BehaviorDetectionBenchmarker(BenchmarkerBase):
         self.label_to_int_mapping = self.map_labels_to_ints()
         self.data = self.read_data()
 
-    def generate_dense_detection_data(self):
+    def generate_dense_detection_data(self, confidence_thresh=0):
         vid_paths = pathlib.Path(self.clip_dir).glob('**/*.mp4')
         for vp in vid_paths:
             print(f'generating dense detection data for {vp.name}')
-            generate_dense_detection_data(vp, self.model_id)
+            generate_dense_detection_data(vp, self.model_id, confidence_thresh)
         print('Done')
         self.data = self.read_data()
 
