@@ -228,7 +228,7 @@ class BehaviorDetectionBenchmarker(BenchmarkerBase):
         data = []
         for cn in self.clip_names:
             label = self.clipname_to_label_mapping[cn]
-            occupancy = self.convert_dets_to_occupancy(cn, 0.1)
+            occupancy = self.convert_dets_to_occupancy(cn, 0.5)
             occupancy_fraction = occupancy.value_counts(normalize=True)[2] if 2 in occupancy.values else 0.0
             data.append([label, occupancy_fraction])
         data = pd.DataFrame(data, columns=['label', 'double_occupancy_fraction'])
@@ -238,7 +238,7 @@ class BehaviorDetectionBenchmarker(BenchmarkerBase):
         data = []
         for cn in self.clip_names:
             label = self.clipname_to_label_mapping[cn]
-            occupancy = self.convert_dets_to_occupancy(cn, 0.9)
+            occupancy = self.convert_dets_to_occupancy(cn, 0.75)
             occupancy_fraction = occupancy.value_counts(normalize=True)[2] if 2 in occupancy.values else 0.0
             data.append([label, occupancy_fraction])
         data = pd.DataFrame(data, columns=['label', 'double_occupancy_fraction'])
@@ -247,7 +247,7 @@ class BehaviorDetectionBenchmarker(BenchmarkerBase):
 
         fig.suptitle('Summary of Benchmarking/Tuning Dataset')
         fig.tight_layout()
-        fig.savefig(str(self.log_dir / f'DataSummary_frameinterval{frame_interval}'))
+        fig.savefig(str(self.log_dir / self.model_id / f'DataSummary_frameinterval{frame_interval}'))
         plt.close(fig)
 
 
