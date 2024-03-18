@@ -8,6 +8,7 @@ import pandas as pd
 FILE = pathlib.Path(__file__).resolve()
 REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
+RESOURCE_DIR = REPO_ROOT_DIR / 'resources'
 
 
 def read_img(img_path):
@@ -64,4 +65,8 @@ class DetectorBase:
         df.to_csv(str(img_dir / outfile_name))
         return df
 
-
+fish_model_path = MODEL_DIR / 'effdet0_fish' / 'ooi.tflite'
+fish_detector = DetectorBase(fish_model_path)
+img_path = RESOURCE_DIR / 'sample_image_cropped.png'
+img = read_img(img_path)
+detections = fish_detector.detect(img)
