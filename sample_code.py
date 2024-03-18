@@ -58,7 +58,7 @@ class DetectorBase:
         img_paths = list(img_dir.glob('*.png'))
         df = []
         for ip in img_paths:
-            dets = detect(read_img(ip), confidence_thresh)
+            dets = self.detect(read_img(ip), confidence_thresh)
             for det in dets:
                 df.append([ip.name, det.bbox.xmin, det.bbox.xmax, det.bbox.ymin, det.bbox.ymax, det.score])
         columns = ['frame', 'xmin', 'xmax', 'ymin', 'ymax', 'score']
