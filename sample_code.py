@@ -10,7 +10,8 @@ REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
 RESOURCE_DIR = REPO_ROOT_DIR / 'resources'
 HOME_DIR = pathlib.Path().home().resolve()
-PICS_DIR = REPO_ROOT_DIR / 'pics2'
+PICS_DIR = REPO_ROOT_DIR / 'pics'
+PICS_DIR2 = REPO_ROOT_DIR / 'pics2'
 
 
 def read_img(img_path):
@@ -69,9 +70,9 @@ class DetectorBase:
 
 fish_model_path = MODEL_DIR / 'effdet0_fish' / 'ooi.tflite'
 fish_detector = DetectorBase(fish_model_path)
-img_path = RESOURCE_DIR / 'sample_image_cropped.png'
-img = read_img(img_path)
-detections = fish_detector.detect(img)
+# img_path = RESOURCE_DIR / 'sample_image_cropped.png'
+# img = read_img(img_path)
+# detections = fish_detector.detect(img)
 # df = fish_detector.detect_multiple(HOME_DIR / 'testing')
 
-df = fish_detector.detect_multiple(PICS_DIR, confidence_thresh = 0.03)
+df = fish_detector.detect_multiple(PICS_DIR2, confidence_thresh = 0.03)
