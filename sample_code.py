@@ -57,7 +57,7 @@ class DetectorBase:
         :return: formatted dataframe of all detections (same dataframe as saved to csv)
         """
         img_dir = pathlib.Path(img_dir)
-        img_paths = list(img_dir.glob('*.png'))
+        img_paths = list(img_dir.glob('*.jpg'))
         df = []
         for ip in img_paths:
             dets = self.detect(read_img(ip), confidence_thresh)
