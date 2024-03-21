@@ -75,4 +75,4 @@ fish_detector = DetectorBase(fish_model_path)
 # detections = fish_detector.detect(img)
 # df = fish_detector.detect_multiple(HOME_DIR / 'testing')
 
-df = fish_detector.detect_multiple(PICS_DIR2, confidence_thresh = 0.03)
+df = fish_detector.detect_multiple(PICS_DIR2, confidence_thresh = 0.0)
