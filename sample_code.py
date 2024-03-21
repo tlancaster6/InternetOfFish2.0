@@ -10,7 +10,7 @@ REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
 RESOURCE_DIR = REPO_ROOT_DIR / 'resources'
 HOME_DIR = pathlib.Path().home().resolve()
-PICS_DIR = REPO_ROOT_DIR / 'pics'
+PICS_DIR = REPO_ROOT_DIR / 'pics2'
 
 
 def read_img(img_path):
