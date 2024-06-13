@@ -31,7 +31,7 @@ def tmp_dir_fixture():
 
 @pytest.fixture
 def data_collector_fixture(tmp_dir_fixture):
-    picamera_kwargs = {'framerate': 30, 'resolution': (720, 900)}
+    picamera_kwargs = {'framerate': 30, 'resolution': (1280, 720)}
     dc = DataCollector(tmp_dir_fixture, picamera_kwargs)
     yield dc
     dc.shutdown()
