@@ -28,8 +28,25 @@ class ConfigManager:
     def load_config(self):
         with open(str(self.config_path), 'r') as f:
             self.config = yaml.load(f, yaml.FullLoader)
+            self.check_config()
         logger.debug('config loaded')
 
+    def check_config(self):
+        updated = False
+        if self.config['h_resolution'] % 32:
+            new_h_resolution = self.config['h_resolution'] + (32 - (self.config['h_resolution'] % 32))
+            logger.warning(f'horizontal resolution must be a multiple of 32. Updated to {new_h_resolution}')
+            self.config['h_resolution'] = new_h_resolution
+            updated = True
+        if self.config['h_resolution'] % 16:
+            new_v_resolution = self.config['h_resolution'] + (16 - (self.config['h_resolution'] % 16))
+            logger.warning(f'vertical resolution must be a multiple of 32. Updated to {new_v_resolution}')
+            self.config['h_resolution'] = new_v_resolution
+            updated = True
+        if updated:
+            self.write_config()
+        else:
+            logger.debug('config passed all checks')
     def write_config(self):
         self.config_path.parent.mkdir(exist_ok=True, parents=True)
         with open(str(self.config_path), 'w') as f:
