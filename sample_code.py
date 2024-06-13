@@ -8,10 +8,8 @@ import pandas as pd
 FILE = pathlib.Path(__file__).resolve()
 REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
-RESOURCE_DIR = REPO_ROOT_DIR / 'resources'
+RESOURCE_DIR = REPO_ROOT_DIR / 'tests' / 'resources'
 HOME_DIR = pathlib.Path().home().resolve()
-PICS_DIR = REPO_ROOT_DIR / 'pics'
-PICS_DIR2 = REPO_ROOT_DIR / 'pics2'
 
 
 def read_img(img_path):
