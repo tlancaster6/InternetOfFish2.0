@@ -58,12 +58,12 @@ def sample_cropped_img_loader_fixture():
 
 @pytest.fixture
 def roi_detector_fixture():
-    yield DetectorBase(TESTING_RESOURCE_DIR / 'roi.tflite')
+    yield DetectorBase(MODEL_DIR / 'effdet0_fish' / 'roi.tflite')
 
 
 @pytest.fixture
 def ooi_detector_fixture():
-    yield DetectorBase(TESTING_RESOURCE_DIR / 'ooi.tflite')
+    yield DetectorBase(MODEL_DIR / 'effdet0_fish' / 'ooi.tflite')
 
 
 @pytest.fixture
