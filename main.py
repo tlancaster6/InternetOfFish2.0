@@ -101,10 +101,9 @@ class Runner:
                 img = img[roi_slice]
                 occupancy = len(self.ooi_detector.detect(img))
                 thumbnail = cv2.resize(img, (img.shape[1]//10, img.shape[0]//10))
-                self.behavior_recognizer.append_data(occupancy, thumbnail)
+                self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
             if current_datetime >= next_behavior_check:
                 if self.behavior_recognizer.check_for_behavior():
-                    # TODO: fill in placeholder attachment path and message
                     mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}'
                     self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
                     notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
