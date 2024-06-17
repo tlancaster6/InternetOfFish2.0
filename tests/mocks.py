@@ -8,9 +8,14 @@ class MockDataCollector:
         self.resolution = (int(self.cap.get(3)), int(self.cap.get(4)))
         self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.framestep = int(self.framerate * framegrab_interval)
-        self.current_frame = 1
+        self.current_frame = 0
 
     def capture_frame(self):
+        ret, img = self.cap.read()
+        self.current_frame += 1
+        if not ret:
+            self.cap.release()
+            return False
         while self.current_frame % self.framestep:
             ret, img = self.cap.read()
             self.current_frame += 1
