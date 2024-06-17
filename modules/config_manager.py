@@ -88,6 +88,11 @@ class ConfigManager:
         logger.debug('new config generated')
         self.write_config()
 
+    def generate_test_config(self):
+        self.generate_new_config()
+        self.config['test'] = True
+        self.write_config()
+
     def config_as_namespace(self):
         return SimpleNamespace(**self.config)
 

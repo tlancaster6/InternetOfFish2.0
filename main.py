@@ -14,6 +14,7 @@ from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
 from modules.config_manager import ConfigManager
 from modules.email_notification import Notifier, Notification
+from tests.mocks import MockDataCollector
 
 
 # establish filesystem locations
@@ -22,6 +23,7 @@ REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
 DEFAULT_DATA_DIR = REPO_ROOT_DIR / 'projects'
 LOG_DIR = REPO_ROOT_DIR / 'logs'
+TESTING_RESOURCEC_DIR = REPO_ROOT_DIR / 'tests' / 'resources'
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))
 if not LOG_DIR.exists():
@@ -70,15 +72,55 @@ class Runner:
         self.behavior_recognizer = BehaviorRecognizer(self.config)
         self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
-        logger.debug('runner initiated')
+        if self.config.test:
+            self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4', self.config.framegrab_interval)
+            logger.info('runner initiated in test mode')
+        else:
+            logger.debug('runner initiated')
 
     def run(self):
+        if self.config.test:
+           self.run_test()
+           return
         current_datetime = datetime.now()
         if self.start_time < current_datetime.time() < self.end_time:
             logger.info('entering active collection mode')
             self.active_mode()
         else:
             self.passive_mode()
+
+    def run_test(self):
+        logger.info('commencing test')
+        first_img = self.collector.capture_frame()
+        logger.info('locating ROI')
+        roi_det = self.roi_detector.detect(first_img)
+        roi_slice = np.s_[roi_det[0].bbox.ymin:roi_det[0].bbox.ymax,
+                    roi_det[0].bbox.xmin:roi_det[0].bbox.xmax]
+        logger.info(f'ROI located. ROI slice set to {roi_slice}')
+        logger.info(f'Commencing fish detection')
+        while True:
+            current_datetime = datetime.now()
+            img = self.collector.capture_and_advance()
+            if not img:
+                break
+            img = img[roi_slice]
+            occupancy = len(self.ooi_detector.detect(img))
+            logger.info(f'\toccupancy: {occupancy}')
+            thumbnail = cv2.resize(img, (img.shape[1] // 10, img.shape[0] // 10))
+            self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
+        logger.info('fish detection complete. running behavior recognition')
+        logger.info(f'double occupancy fraction: {self.behavior_recognizer.calc_activity_fraction()}')
+        if self.behavior_recognizer.check_for_behavior():
+            logger.info('behavior event recognized. Preparing clip.')
+            mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}'
+            self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
+            notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
+                                        message='',
+                                        attachment_path=str(mp4_path))
+            self.notifier.send_email(notification)
+        else:
+            logger.info('behavioral event not recognized')
+        self.uploader.convert_and_upload()
 
     def active_mode(self):
         self.collector.start_recording()
@@ -138,18 +180,25 @@ def parse_opt(known=False):
                              'you can edit the default config.yaml file if necessary.',
                         default=None)
 
-    # parser.add_argument('--test',
-    #                     action='store_true',
-    #                     help='run a suite of automated tests to diagnose potential problems')
+    parser.add_argument('--test',
+                        action='store_true',
+                        help='run a suite of automated tests to diagnose potential problems')
 
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
 
 if __name__ == "__main__":
     opt = parse_opt()
-    config_path = DEFAULT_DATA_DIR / opt.project_id / 'config.yaml'
-    if config_path.exists():
+    if opt.test:
+        config_path = DEFAULT_DATA_DIR / 'test_project' / 'config.yaml'
+        config_manager = ConfigManager(config_path)
+        config_manager.generate_test_config()
         runner = Runner(config_path)
         runner.run()
     else:
-        new_project(config_path)
+        config_path = DEFAULT_DATA_DIR / opt.project_id / 'config.yaml'
+        if config_path.exists():
+            runner = Runner(config_path)
+            runner.run()
+        else:
+            new_project(config_path)

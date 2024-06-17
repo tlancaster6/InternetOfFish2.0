@@ -20,11 +20,16 @@ sudo pip3 install pause
 sudo pip3 install PyYAML
 sudo pip3 install sendgrid
 ```
+
 5) Move into the repo root directory and run pytest to check that everything is working
 ```
 cd ~/InternetOfFish2.0
 pytest
 ```
+
+## Rclone Setup for automated uploads (optional)
+
+## Sendgrid Setup for email notifications (optional)
 
 ## Usage
 1) open the terminal on the Pi and move into the InternetOfFish2.0 directory
