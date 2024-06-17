@@ -27,7 +27,7 @@ class MockDataCollector:
 
     def capture_and_advance(self):
         img = self.capture_frame()
-        if img:
+        if img is not False:
             self.advance_video(self.framestep)
         return img
 
