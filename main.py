@@ -122,10 +122,11 @@ class Runner:
                                         message=f'activity fraction: {self.behavior_recognizer.calc_activity_fraction()}',
                                         attachment_path=str(mp4_path))
             self.notifier.notify(notification)
-            'Test complete. Exiting.'
         else:
             logger.info('behavioral event not recognized')
+        logger.info('uploading results')
         self.uploader.convert_and_upload()
+        logger.info('test complete. exiting.')
 
     def active_mode(self):
         self.collector.start_recording()
