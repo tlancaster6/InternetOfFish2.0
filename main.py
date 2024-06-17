@@ -117,11 +117,11 @@ class Runner:
             logger.info('behavior event recognized. Preparing clip.')
             mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}.mp4'
             self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
-            # logger.info('sending email notification')
-            # notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
-            #                             message=f'activity fraction: {self.behavior_recognizer.calc_activity_fraction()}',
-            #                             attachment_path=str(mp4_path))
-            # self.notifier.notify(notification)
+            logger.info('sending email notification')
+            notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
+                                        message=f'activity fraction: {self.behavior_recognizer.calc_activity_fraction()}',
+                                        attachment_path=str(mp4_path))
+            self.notifier.notify(notification)
         else:
             logger.info('behavioral event not recognized')
         logger.info('uploading results')
