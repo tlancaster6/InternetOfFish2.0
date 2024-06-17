@@ -104,7 +104,8 @@ class Runner:
             if img is False:
                 break
             img = img[roi_slice]
-            occupancy = len(self.ooi_detector.detect(img))
+            dets = self.ooi_detector.detect(img)
+            occupancy = len(dets)
             logger.info(f'\toccupancy: {occupancy}')
             thumbnail = cv2.resize(img, (img.shape[1] // 10, img.shape[0] // 10))
             self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
@@ -112,7 +113,7 @@ class Runner:
         logger.info(f'double occupancy fraction: {self.behavior_recognizer.calc_activity_fraction()}')
         if self.behavior_recognizer.check_for_behavior():
             logger.info('behavior event recognized. Preparing clip.')
-            mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}'
+            mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}.mp4'
             self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
             notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
                                         message='',
@@ -146,7 +147,7 @@ class Runner:
                 self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
             if current_datetime >= next_behavior_check:
                 if self.behavior_recognizer.check_for_behavior():
-                    mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}'
+                    mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}.mp4'
                     self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
                     notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
                                                 message='',

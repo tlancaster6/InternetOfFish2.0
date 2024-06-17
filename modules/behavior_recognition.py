@@ -38,7 +38,9 @@ class BehaviorRecognizer:
         fps = 1 // self.config.framegrab_interval
         height, width, _ = self.data_buffer[0][2].shape
         video = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
-        for _, _, thumbnail in self.data_buffer:
+        for _, occupancy, thumbnail in self.data_buffer:
+            cv2.putText(thumbnail, f'occupancy = {occupancy}', (50, 50),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2, cv2.LINE_4)
             video.write(thumbnail)
         video.release()
 
