@@ -100,7 +100,7 @@ class Runner:
         logger.info(f'Commencing fish detection')
         while True:
             current_datetime = datetime.now()
-            img = self.collector.capture_and_advance()
+            img = self.collector.capture_frame()
             if img is False:
                 break
             img = img[roi_slice]

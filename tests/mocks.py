@@ -8,29 +8,16 @@ class MockDataCollector:
         self.resolution = (int(self.cap.get(3)), int(self.cap.get(4)))
         self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.framestep = int(self.framerate * framegrab_interval)
-        self.last_capture = None
-
-    def start_recording(self):
-        pass
-
-    def advance_video(self, n_frames):
-        current_frame = self.cap.get(cv2.CAP_PROP_POS_FRAMES)
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, current_frame + n_frames)
+        self.current_frame = 1
 
     def capture_frame(self):
-        ret, img = self.cap.read()
-        if not ret:
-            self.cap.release()
-            return False
-        else:
-            return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-    def capture_and_advance(self):
-        img = self.capture_frame()
-        if img is not False:
-            self.advance_video(self.framestep)
-        return img
-
+        while self.current_frame % self.framestep:
+            ret, img = self.cap.read()
+            self.current_frame += 1
+            if not ret:
+                self.cap.release()
+                return False
+        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     def shutdown(self):
         self.cap.release()
