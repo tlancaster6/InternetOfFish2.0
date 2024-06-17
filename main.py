@@ -118,7 +118,7 @@ class Runner:
             notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
                                         message='',
                                         attachment_path=str(mp4_path))
-            self.notifier.send_email(notification)
+            self.notifier.notify(notification)
         else:
             logger.info('behavioral event not recognized')
         self.uploader.convert_and_upload()
