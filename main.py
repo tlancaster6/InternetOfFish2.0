@@ -143,7 +143,8 @@ class Runner:
             if roi_slice:
                 img = img[roi_slice]
                 occupancy = len(self.ooi_detector.detect(img))
-                thumbnail = cv2.resize(img, (img.shape[1]//10, img.shape[0]//10))
+                thumbnail = cv2.resize(img, (img.shape[1]//4, img.shape[0]//4))
+                thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
                 self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
             if current_datetime >= next_behavior_check:
                 if self.behavior_recognizer.check_for_behavior():
@@ -192,10 +193,18 @@ if __name__ == "__main__":
     opt = parse_opt()
     if opt.test:
         config_path = DEFAULT_DATA_DIR / 'test_project' / 'config.yaml'
-        config_manager = ConfigManager(config_path)
-        config_manager.generate_test_config()
+        if not config_path.exists():
+            config_manager = ConfigManager(config_path)
+            config_manager.generate_test_config()
+            print(
+                'default config generated. To test email notification and automated uploads, open the config.yaml file now\n'
+                '(located under projects/interactive_test), provide appropriate values for cloud_data_dir, user_email, \n'
+                'sendgrid_api_key, and sendgrid_from_email, then save and close the config file. Or leave the config.yaml\n'
+                'file alone to skip these tests. ')
+            input('Press enter when ready to resume testing')
         runner = Runner(config_path)
         runner.run()
+
     else:
         config_path = DEFAULT_DATA_DIR / opt.project_id / 'config.yaml'
         if config_path.exists():

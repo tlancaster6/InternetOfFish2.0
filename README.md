@@ -28,6 +28,19 @@ pytest
 ```
 
 ## Rclone Setup for automated uploads (optional)
+1) install rclone:
+```
+sudo -v ; curl https://rclone.org/install.sh | sudo bash
+```
+2) configure your rclone remote (instructions here: https://rclone.org/dropbox/)
+3) To enable automated uploads for a project, first create a new project by running the following command
+   (but with a unique project id of your choosing)
+```commandline
+main.py --pid your_project_id
+```
+4) when prompted, open the config.yaml file, and change the cloud_data_dir variable to your cloud path,
+including the rclone remote, where the project will be stored.
+5) rerun main.py (with the same project id )
 
 ## Sendgrid Setup for email notifications (optional)
 
