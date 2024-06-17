@@ -107,7 +107,8 @@ class Runner:
             dets = self.ooi_detector.detect(img)
             occupancy = len(dets)
             logger.info(f'\toccupancy: {occupancy}')
-            thumbnail = cv2.resize(img, (img.shape[1] // 10, img.shape[0] // 10))
+            thumbnail = cv2.resize(img, (img.shape[1] // 4, img.shape[0] // 4))
+            thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
             self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
         logger.info('fish detection complete. running behavior recognition')
         logger.info(f'double occupancy fraction: {self.behavior_recognizer.calc_activity_fraction()}')
@@ -143,7 +144,7 @@ class Runner:
             if roi_slice:
                 img = img[roi_slice]
                 occupancy = len(self.ooi_detector.detect(img))
-                thumbnail = cv2.resize(img, (img.shape[1]//2, img.shape[0]//2))
+                thumbnail = cv2.resize(img, (img.shape[1]//4, img.shape[0]//4))
                 thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
                 self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
             if current_datetime >= next_behavior_check:
