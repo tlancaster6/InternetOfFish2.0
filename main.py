@@ -67,7 +67,7 @@ class Runner:
         self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
-        self.behavior_recognizer = BehaviorRecognizer()
+        self.behavior_recognizer = BehaviorRecognizer(self.config)
         self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
         logger.debug('runner initiated')
