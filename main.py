@@ -101,7 +101,7 @@ class Runner:
         while True:
             current_datetime = datetime.now()
             img = self.collector.capture_and_advance()
-            if not img:
+            if img is False:
                 break
             img = img[roi_slice]
             occupancy = len(self.ooi_detector.detect(img))
