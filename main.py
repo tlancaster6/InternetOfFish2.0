@@ -111,13 +111,14 @@ class Runner:
             thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
             self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
         logger.info('fish detection complete. running behavior recognition')
-        logger.info(f'double occupancy fraction: {self.behavior_recognizer.calc_activity_fraction()}')
+        activity_fraction = self.behavior_recognizer.calc_activity_fraction()
+        logger.info(f'double occupancy fraction: {activity_fraction}')
         if self.behavior_recognizer.check_for_behavior():
             logger.info('behavior event recognized. Preparing clip.')
             mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}.mp4'
             self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
             notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
-                                        message='',
+                                        message=f'activity fraction: {self.behavior_recognizer.calc_activity_fraction()}',
                                         attachment_path=str(mp4_path))
             self.notifier.notify(notification)
         else:

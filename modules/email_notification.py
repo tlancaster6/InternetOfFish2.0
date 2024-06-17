@@ -5,7 +5,7 @@ import datetime as dt
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import (
     Mail, Attachment, FileContent, FileName,
-    FileType, Disposition)
+    FileType, Disposition, Content)
 import logging
 import base64
 import os
@@ -22,7 +22,7 @@ class Notification:
             from_email=from_email,
             to_emails=to_email,
             subject=self.subject,
-            html_content=self.message
+            html_content=Content('text/plain', self.message)
         )
         if self.attachment_path is not None:
             self.attachment_path = str(self.attachment_path)
