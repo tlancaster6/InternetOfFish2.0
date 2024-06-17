@@ -21,7 +21,7 @@ sudo pip3 install PyYAML
 sudo pip3 install sendgrid
 ```
 
-5) Move into the repo root directory and run pytest to check that everything is working
+5) Move into the repo root directory and run pytest to run a basic battery of tests
 ```
 cd ~/InternetOfFish2.0
 pytest

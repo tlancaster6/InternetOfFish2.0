@@ -20,7 +20,7 @@ class Notification:
     def as_mail(self, from_email, to_email):
         mail = Mail(
             from_email=from_email,
-            to_email=to_email,
+            to_emails=to_email,
             subject=self.subject,
             html_content=self.message
         )

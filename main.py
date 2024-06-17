@@ -197,9 +197,9 @@ if __name__ == "__main__":
             config_manager = ConfigManager(config_path)
             config_manager.generate_test_config()
             print(
-                'default config generated. To test email notification and automated uploads, open the config.yaml file now\n'
-                '(located under projects/interactive_test), provide appropriate values for cloud_data_dir, user_email, \n'
-                'sendgrid_api_key, and sendgrid_from_email, then save and close the config file. Or leave the config.yaml\n'
+                'default config generated. To test email notification and automated uploads, open the config.yaml file now '
+                '(located under projects/interactive_test), provide appropriate values for cloud_data_dir, user_email, '
+                'sendgrid_api_key, and sendgrid_from_email, then save and close the config file. Or leave the config.yaml '
                 'file alone to skip these tests. ')
             input('Press enter when ready to resume testing')
         runner = Runner(config_path)
