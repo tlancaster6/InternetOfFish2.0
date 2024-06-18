@@ -154,3 +154,4 @@ if __name__ == "__main__":
         runner.run()
     else:
         new_project(config_path)
+
