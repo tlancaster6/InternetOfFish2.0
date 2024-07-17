@@ -47,6 +47,7 @@ class ConfigManager:
             self.write_config()
         else:
             logger.debug('config passed all checks')
+
     def write_config(self):
         self.config_path.parent.mkdir(exist_ok=True, parents=True)
         with open(str(self.config_path), 'w') as f:

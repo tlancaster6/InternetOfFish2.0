@@ -8,13 +8,12 @@ import logging
 import cv2
 from logging.handlers import RotatingFileHandler
 
-from modules.data_collection import DataCollector
+from modules.data_collection import DataCollector, MockDataCollector
 from modules.object_detection import DetectorBase
 from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
 from modules.config_manager import ConfigManager
 from modules.email_notification import Notifier, Notification
-from tests.mocks import MockDataCollector
 
 
 # establish filesystem locations
@@ -23,7 +22,7 @@ REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
 DEFAULT_DATA_DIR = REPO_ROOT_DIR / 'projects'
 LOG_DIR = REPO_ROOT_DIR / 'logs'
-TESTING_RESOURCEC_DIR = REPO_ROOT_DIR / 'tests' / 'resources'
+TESTING_RESOURCEC_DIR = REPO_ROOT_DIR / 'resources'
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))
 if not LOG_DIR.exists():
@@ -97,7 +96,7 @@ class Runner:
         roi_slice = np.s_[roi_det[0].bbox.ymin:roi_det[0].bbox.ymax,
                     roi_det[0].bbox.xmin:roi_det[0].bbox.xmax]
         logger.info(f'ROI located. ROI slice set to {roi_slice}')
-        logger.info(f'Commencing fish detection')
+        logger.info(f'Commencing OOI detection')
         while True:
             current_datetime = datetime.now()
             img = self.collector.capture_frame()

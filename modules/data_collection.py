@@ -8,6 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 from time import sleep
 
+
 class DataCollector:
 
     def __init__(self, video_dir, picamera_kwargs=None):
@@ -55,3 +56,31 @@ class DataCollector:
             logger.debug('Could not stop recording because camera was not recording. Skipping.')
         self.cam.close()
         logger.debug('DataCollector shutdown complete')
+
+
+class MockDataCollector:
+
+    def __init__(self, source_video, framegrab_interval):
+        self.source_video = source_video
+        self.cap = cv2.VideoCapture(str(self.source_video))
+        self.resolution = (int(self.cap.get(3)), int(self.cap.get(4)))
+        self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
+        self.framestep = int(self.framerate * framegrab_interval)
+        self.current_frame = 0
+
+    def capture_frame(self):
+        ret, img = self.cap.read()
+        self.current_frame += 1
+        if not ret:
+            self.cap.release()
+            return False
+        while self.current_frame % self.framestep:
+            ret, img = self.cap.read()
+            self.current_frame += 1
+            if not ret:
+                self.cap.release()
+                return False
+        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    def shutdown(self):
+        self.cap.release()
