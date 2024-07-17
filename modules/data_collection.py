@@ -67,6 +67,7 @@ class MockDataCollector:
         self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.framestep = int(self.framerate * framegrab_interval)
         self.current_frame = 0
+        logger.debug('mock data collector initialized')
 
     def capture_frame(self):
         ret, img = self.cap.read()
