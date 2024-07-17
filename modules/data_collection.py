@@ -84,3 +84,18 @@ class MockDataCollector:
 
     def shutdown(self):
         self.cap.release()
+
+    def start_recording(self):
+        pass
+
+    def stop_recording(self):
+        pass
+
+    def init_camera(self):
+        pass
+
+    def generate_h264_path(self):
+        pass
+
+    def split_recording(self):
+        pass

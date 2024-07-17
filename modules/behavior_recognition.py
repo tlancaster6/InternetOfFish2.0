@@ -40,7 +40,7 @@ class BehaviorRecognizer:
         video = cv2.VideoWriter(str(output_path), fourcc, fps, (width, height))
         for _, occupancy, thumbnail in self.data_buffer:
             cv2.putText(thumbnail, f'{occupancy}', (5, 5),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3, cv2.LINE_6, bottomLeftOrigin=True)
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 3, cv2.LINE_8, bottomLeftOrigin=True)
             video.write(thumbnail)
         video.release()
 
