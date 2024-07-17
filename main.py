@@ -65,7 +65,6 @@ class Runner:
         self.video_split_interval = timedelta(hours=self.config.video_split_hours)
         self.picamera_kwargs = {'framerate': self.config.framerate,
                                 'resolution': (self.config.h_resolution, self.config.v_resolution)}
-        self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
         self.behavior_recognizer = BehaviorRecognizer(self.config)
@@ -75,6 +74,7 @@ class Runner:
             self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4', self.config.framegrab_interval)
             logger.info('runner initiated in test mode')
         else:
+            self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
             logger.debug('runner initiated')
 
     def run(self):
@@ -112,7 +112,7 @@ class Runner:
             self.behavior_recognizer.append_data(mock_timestamp.timestamp(), occupancy, thumbnail)
             mock_timestamp = mock_timestamp + self.framegrab_interval
             iter_count += 1
-        logger.info('fish detection complete. running behavior recognition with {} unique occupancy values')
+        logger.info(f'fish detection complete. running behavior recognition with {len(self.behavior_recognizer.data_buffer)} unique occupancy values')
         activity_fraction = self.behavior_recognizer.calc_activity_fraction()
         logger.info(f'double occupancy fraction: {activity_fraction}')
         if self.behavior_recognizer.check_for_behavior():
