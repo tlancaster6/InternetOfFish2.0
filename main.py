@@ -79,7 +79,7 @@ class Runner:
 
     def run(self):
         if self.config.test:
-           self.run_test()
+           self.test_mode()
            return
         current_datetime = datetime.now()
         if self.start_time < current_datetime.time() < self.end_time:
@@ -88,7 +88,7 @@ class Runner:
         else:
             self.passive_mode()
 
-    def run_test(self):
+    def test_mode(self):
         logger.info('commencing test')
         first_img = self.collector.capture_frame()
         logger.info('locating ROI')
@@ -97,24 +97,27 @@ class Runner:
                     roi_det[0].bbox.xmin:roi_det[0].bbox.xmax]
         logger.info(f'ROI located. ROI slice set to {roi_slice}')
         logger.info(f'Commencing OOI detection')
+        mock_timestamp = datetime(year=2000, month=1, day=1, hour=12)
+        iter_count = 0
         while True:
-            current_datetime = datetime.now()
             img = self.collector.capture_frame()
             if img is False:
                 break
             img = img[roi_slice]
             dets = self.ooi_detector.detect(img)
             occupancy = len(dets)
-            logger.info(f'\toccupancy: {occupancy}')
+            logger.info(f'\t{iter_count}| frame {self.collector.current_frame} occupancy: {occupancy}')
             thumbnail = cv2.resize(img, (img.shape[1] // 4, img.shape[0] // 4))
             thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
-            self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
-        logger.info('fish detection complete. running behavior recognition')
+            self.behavior_recognizer.append_data(mock_timestamp.timestamp(), occupancy, thumbnail)
+            mock_timestamp = mock_timestamp + self.framegrab_interval
+            iter_count += 1
+        logger.info('fish detection complete. running behavior recognition with {} unique occupancy values')
         activity_fraction = self.behavior_recognizer.calc_activity_fraction()
         logger.info(f'double occupancy fraction: {activity_fraction}')
         if self.behavior_recognizer.check_for_behavior():
             logger.info('behavior event recognized. Preparing clip.')
-            mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}.mp4'
+            mp4_path = self.video_dir / f'eventclip_{int(datetime.now().timestamp())}.mp4'
             self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
             logger.info('sending email notification')
             notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
