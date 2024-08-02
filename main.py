@@ -68,7 +68,7 @@ class Runner:
         self.framegrab_interval = timedelta(seconds=self.config.framegrab_interval)
         logger.debug(f'Framegrab interval set to {self.framegrab_interval}')
         self.behavior_check_interval = timedelta(seconds=self.config.behavior_check_interval)
-        logger.info(f'Behavior check interval set to {self.behavior_check_interval}')
+        logger.debug(f'Behavior check interval set to {self.behavior_check_interval}')
         self.video_split_interval = timedelta(hours=self.config.video_split_hours)
         logger.debug(f'Video split interval set to {self.video_split_interval}')
         self.picamera_kwargs = {'framerate': self.config.framerate,

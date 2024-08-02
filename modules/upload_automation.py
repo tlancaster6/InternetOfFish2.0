@@ -27,7 +27,7 @@ class Uploader:
             self.upload_project()
 
     def convert_h264s_to_mp4s(self):
-        logger.debug('converting h264s for mp4s')
+        logger.debug('converting h264s to mp4s')
         local_video_dir = self.local_project_dir / 'Videos'
         h264_paths = local_video_dir.glob('*.h264')
         for h264_p in h264_paths:
