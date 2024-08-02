@@ -78,15 +78,16 @@ class Runner:
             logger.debug('runner initiated')
 
     def run(self):
-        if self.config.test:
-           self.test_mode()
-           return
-        current_datetime = datetime.now()
-        if self.start_time < current_datetime.time() < self.end_time:
-            logger.info('entering active collection mode')
-            self.active_mode()
-        else:
-            self.passive_mode()
+        while True:
+            if self.config.test:
+               self.test_mode()
+               return
+            current_datetime = datetime.now()
+            if self.start_time < current_datetime.time() < self.end_time:
+                logger.info('entering active collection mode')
+                self.active_mode()
+            else:
+                self.passive_mode()
 
     def test_mode(self):
         logger.info('commencing test')
@@ -131,6 +132,7 @@ class Runner:
         logger.info('test complete. exiting.')
 
     def active_mode(self):
+        logger.info('entering active collection mode')
         self.collector.start_recording()
         current_datetime = datetime.now()
         next_video_split = (current_datetime + self.video_split_interval).replace(minute=0, second=0, microsecond=0)
@@ -141,6 +143,10 @@ class Runner:
         while self.start_time < current_datetime.time() < self.end_time:
             next_framegrab = current_datetime + self.framegrab_interval
             img = self.collector.capture_frame()
+            if img.size == 0:
+                logger.debug(f'invalid image with shape {img.shape} encountered. Skipping')
+                pause.until(next_framegrab)
+                current_datetime = datetime.now()
             if current_datetime >= next_roi_update:
                 roi_det = self.roi_detector.detect(img)
                 if roi_det:
@@ -161,8 +167,10 @@ class Runner:
                                                 message='',
                                                 attachment_path=str(mp4_path))
                     self.notifier.send_email(notification)
+                    next_behavior_check = next_behavior_check + self.behavior_check_interval
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
+                next_video_split = next_video_split + self.video_split_interval
             pause.until(next_framegrab)
             current_datetime = datetime.now()
         self.collector.stop_recording()
