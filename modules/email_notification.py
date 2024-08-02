@@ -41,6 +41,7 @@ class Notification:
 class Notifier:
 
     def __init__(self, user_email, from_email, api_key, min_notification_interval=600, max_notifications_per_day=20):
+        logger.info('Beginning Notifier initialization')
         self.user_email, self.from_email, self.api_key = user_email, from_email, api_key
         self.disabled_flag = (self.user_email is None) or (self.api_key is None)
         self.min_notification_interval = min_notification_interval
@@ -49,10 +50,10 @@ class Notifier:
         self.notification_count = 0
         if self.disabled_flag:
             logger.info('Notifier initialized in light mode. To enable email notifications, provide values for '
-                        'both the "api_key" and "user_email" parameters in the project config file.')
+                        'both the "api_key" and "user_email" parameters in the project config file.\n\n')
         else:
             self.api_client = SendGridAPIClient(api_key)
-            logger.debug('Notifier initialized')
+            logger.debug('Notifier successfully initialized\n\n')
 
     def notify(self, notification: Notification, override_checks=False):
         if self.disabled_flag:

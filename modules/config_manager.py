@@ -18,12 +18,13 @@ class ConfigManager:
         project_id: unique name for project
 
         """
+        logger.info('Beginning ConfigManager initialization')
         self.config_path = config_path
         if config_path.exists():
             self.load_config()
         else:
             self.config = None
-        logger.debug('ConfigManager initialized')
+        logger.info('ConfigManager successfully initialized\n\n')
 
     def load_config(self):
         with open(str(self.config_path), 'r') as f:

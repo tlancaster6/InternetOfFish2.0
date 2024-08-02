@@ -32,7 +32,7 @@ if not LOG_DIR.exists():
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter(fmt='%(asctime)s %(name)-16s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-fh = RotatingFileHandler(str(LOG_DIR / 'debug.log'), maxBytes=500000, backupCount=1)
+fh = RotatingFileHandler(str(LOG_DIR / 'debug.log'), maxBytes=500000, backupCount=2)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 ch = logging.StreamHandler()
@@ -45,26 +45,37 @@ logger.addHandler(ch)
 def new_project(config_path):
     config_manager = ConfigManager(config_path)
     config_manager.generate_new_config()
-    print(f'new project config generated and saved to {config_path}. '
-          'Edit this file if desired, then re-run main.py to initiate data collection. Note that, to enable email '
-          'notifications and rclone uploads, you must supply the "cloud_data_dir" and "user_email" fields manually '
-          'in the config ')
+    print(f'new project config generated and saved to {config_path}. Edit this file if desired'
+          'then re-run main.py to initiate data collection. To enable email notifications, '
+          'provide valid entries for "sendgrid_api_key", "sendgrid_from_email", and "user_email". To enable automated '
+          'uploads, ensure you have properly installed and configured rclone and provide a valid entry for the '
+          '"cloud_data_dir" in the form "rclone_remote:/full/path/to/upload/directory. ')
 
 
 class Runner:
 
     def __init__(self, config_path: pathlib.Path):
+        logger.info('beginning runner initialization')
         self.project_dir = config_path.parent
         self.video_dir = self.project_dir / 'Videos'
         self.config = ConfigManager(config_path).config_as_namespace()
+
         self.start_time = time(hour=self.config.start_hour)
         self.end_time = time(hour=self.config.end_hour)
+        logger.info(f'data collection will run from {self.start_time} to {self.end_time} each day')
         self.roi_update_interval = timedelta(seconds=self.config.roi_update_interval)
+        logger.info(f'ROI update interval set to {self.roi_update_interval}')
         self.framegrab_interval = timedelta(seconds=self.config.framegrab_interval)
+        logger.info(f'Framegrab interval set to {self.framegrab_interval}')
         self.behavior_check_interval = timedelta(seconds=self.config.behavior_check_interval)
+        logger.info(f'Behavior check interval set to {self.behavior_check_interval}')
         self.video_split_interval = timedelta(hours=self.config.video_split_hours)
+        logger.info(f'Video split interval set to {self.video_split_interval}')
         self.picamera_kwargs = {'framerate': self.config.framerate,
                                 'resolution': (self.config.h_resolution, self.config.v_resolution)}
+        logger.info(f'camera framerate set to: {self.picamera_kwargs["framerate"]}')
+        logger.info(f'camera resolution set to: {self.picamera_kwargs["resolution"]}')
+
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
         self.behavior_recognizer = BehaviorRecognizer(self.config)
@@ -72,22 +83,29 @@ class Runner:
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
         if self.config.test:
             self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4', self.config.framegrab_interval)
-            logger.info('runner initiated in test mode')
+            logger.info('runner successfully initialized in test mode\n\n')
         else:
             self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
-            logger.debug('runner initiated')
+            logger.debug('runner successfully initialized\n\n')
 
     def run(self):
-        while True:
-            if self.config.test:
-               self.test_mode()
-               return
-            current_datetime = datetime.now()
-            if self.start_time < current_datetime.time() < self.end_time:
-                logger.info('entering active collection mode')
-                self.active_mode()
-            else:
-                self.passive_mode()
+        logger.info('Entering main run loop. Press Ctrl-C at any time to exit')
+        try:
+            while True:
+                if self.config.test:
+                   self.test_mode()
+                   return
+                current_datetime = datetime.now()
+                if self.start_time < current_datetime.time() < self.end_time:
+                    self.active_mode()
+                else:
+                    self.passive_mode()
+        except KeyboardInterrupt:
+            logger.info('Keyboard Interrupt Detected. Running Cleanup operations, please wait until the program exits')
+            self.collector.shutdown()
+            self.uploader.convert_and_upload()
+            logger.info('Shutdown complete. Exiting')
+            sys.exit(0)
 
     def test_mode(self):
         logger.info('commencing test')

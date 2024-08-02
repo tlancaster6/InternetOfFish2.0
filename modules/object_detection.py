@@ -11,11 +11,14 @@ logger = logging.getLogger(__name__)
 class DetectorBase:
 
     def __init__(self, model_path, confidence_thresh=0.25):
+        logger.info(f'Beginning DetectorBase initialization for {model_path.name}')
         self.confidence_thresh = confidence_thresh
+        logger.info(f'confidence threshold set to f{confidence_thresh}')
         self.interpreter = make_interpreter(str(model_path))
         self.interpreter.allocate_tensors()
+        logger.info(f'interpreter initialized and tensors allocated')
         self.input_size = common.input_size(self.interpreter)
-        logger.debug(f'DetectorBase initalized for {model_path.name}')
+        logger.info(f'DetectorBase successfully initialized for {model_path.name}\n\n')
 
     def detect(self, img):
         scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])
@@ -24,24 +27,6 @@ class DetectorBase:
         dets = detect.get_objects(self.interpreter, self.confidence_thresh, scale)
         return sorted(dets, reverse=True, key=lambda x: x.score)
 
-    def _timed_detect(self, img):
-        times = {}
-
-        start = perf_counter()
-        img = cv2.resize(img, self.input_size)
-        byte_img = img.tobytes()
-        times.update({'preprocessing': perf_counter() - start})
-
-        start = perf_counter()
-        run_inference(self.interpreter, byte_img)
-        times.update({'inference': perf_counter() - start})
-
-        start = perf_counter()
-        scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])
-        dets = detect.get_objects(self.interpreter, self.confidence_thresh, scale)
-        times.update({'postprocessing': perf_counter() - start})
-
-        return dets, times
 
 
 

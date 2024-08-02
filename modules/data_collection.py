@@ -12,12 +12,13 @@ from time import sleep
 class DataCollector:
 
     def __init__(self, video_dir, picamera_kwargs=None):
+        logger.info('Beginning data collector initialization')
         self.picamera_kwargs = picamera_kwargs
         self.video_dir = video_dir
         self.video_dir.mkdir(exist_ok=True, parents=True)
         self.cam = self.init_camera(picamera_kwargs)
         self.resolution = self.cam.resolution
-        logger.debug('DataCollector initialized')
+        logger.info('DataCollector successfully initialized\n\n')
 
     def init_camera(self, picamera_kwargs):
         if picamera_kwargs:
@@ -55,19 +56,20 @@ class DataCollector:
         except picamera.PiCameraNotRecording:
             logger.debug('Could not stop recording because camera was not recording. Skipping.')
         self.cam.close()
-        logger.debug('DataCollector shutdown complete')
+        logger.info('DataCollector shutdown complete')
 
 
 class MockDataCollector:
 
     def __init__(self, source_video, framegrab_interval):
+        logger.info('Beginning MockDataCollector initialization')
         self.source_video = source_video
         self.cap = cv2.VideoCapture(str(self.source_video))
         self.resolution = (int(self.cap.get(3)), int(self.cap.get(4)))
         self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.framestep = int(self.framerate * framegrab_interval)
         self.current_frame = 0
-        logger.debug('mock data collector initialized')
+        logger.info('MockDataCollector successfully initialized\n\n')
 
     def capture_frame(self):
         ret, img = self.cap.read()
