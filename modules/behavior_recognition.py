@@ -9,19 +9,19 @@ logger = logging.getLogger(__name__)
 class BehaviorRecognizer:
 
     def __init__(self, config):
-        logger.info('Beginning BehaviorRecognizer initialization')
+        logger.debug('Beginning BehaviorRecognizer initialization')
         self.config = config
         self.behavior_check_window = config.behavior_check_window
-        logger.info(f'behavior check window set to {self.behavior_check_window} seconds')
+        logger.debug(f'behavior check window set to {self.behavior_check_window} seconds')
         self.min_individuals_roi = config.behavior_min_individuals_roi
         self.max_individuals_roi = config.behavior_max_individuals_roi
-        logger.info(f'min and max individuals in ROI to trigger occupancy condition set to '
+        logger.debug(f'min and max individuals in ROI to trigger occupancy condition set to '
                     f'{self.min_individuals_roi} and {self.max_individuals_roi}')
         self.min_fraction_for_notification = config.behavior_min_fraction_for_notification
-        logger.info(f'notification will trigger when {self.min_fraction_for_notification * 100}% of recent frames'
+        logger.debug(f'notification will trigger when {self.min_fraction_for_notification * 100}% of recent frames'
                     f'meet the occupancy condition')
         self.data_buffer = []
-        logger.info('BehaviorRecognizer successfully initialized\n\n')
+        logger.info('BehaviorRecognizer successfully initialized')
 
     def append_data(self, timestamp, occupancy, thumbnail):
         self.data_buffer.append((timestamp, occupancy, thumbnail))

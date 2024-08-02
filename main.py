@@ -55,26 +55,26 @@ def new_project(config_path):
 class Runner:
 
     def __init__(self, config_path: pathlib.Path):
-        logger.info('beginning runner initialization')
+        logger.debug('beginning runner initialization')
         self.project_dir = config_path.parent
         self.video_dir = self.project_dir / 'Videos'
         self.config = ConfigManager(config_path).config_as_namespace()
 
         self.start_time = time(hour=self.config.start_hour)
         self.end_time = time(hour=self.config.end_hour)
-        logger.info(f'data collection will run from {self.start_time} to {self.end_time} each day')
+        logger.debug(f'data collection will run from {self.start_time} to {self.end_time} each day')
         self.roi_update_interval = timedelta(seconds=self.config.roi_update_interval)
-        logger.info(f'ROI update interval set to {self.roi_update_interval}')
+        logger.debug(f'ROI update interval set to {self.roi_update_interval}')
         self.framegrab_interval = timedelta(seconds=self.config.framegrab_interval)
-        logger.info(f'Framegrab interval set to {self.framegrab_interval}')
+        logger.debug(f'Framegrab interval set to {self.framegrab_interval}')
         self.behavior_check_interval = timedelta(seconds=self.config.behavior_check_interval)
         logger.info(f'Behavior check interval set to {self.behavior_check_interval}')
         self.video_split_interval = timedelta(hours=self.config.video_split_hours)
-        logger.info(f'Video split interval set to {self.video_split_interval}')
+        logger.debug(f'Video split interval set to {self.video_split_interval}')
         self.picamera_kwargs = {'framerate': self.config.framerate,
                                 'resolution': (self.config.h_resolution, self.config.v_resolution)}
-        logger.info(f'camera framerate set to: {self.picamera_kwargs["framerate"]}')
-        logger.info(f'camera resolution set to: {self.picamera_kwargs["resolution"]}')
+        logger.debug(f'camera framerate set to: {self.picamera_kwargs["framerate"]}')
+        logger.debug(f'camera resolution set to: {self.picamera_kwargs["resolution"]}')
 
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
@@ -83,10 +83,10 @@ class Runner:
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
         if self.config.test:
             self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4', self.config.framegrab_interval)
-            logger.info('runner successfully initialized in test mode\n\n')
+            logger.info('runner successfully initialized in test mode')
         else:
             self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
-            logger.debug('runner successfully initialized\n\n')
+            logger.info('runner successfully initialized')
 
     def run(self):
         logger.info('Entering main run loop. Press Ctrl-C at any time to exit')

@@ -11,14 +11,14 @@ logger = logging.getLogger(__name__)
 class DetectorBase:
 
     def __init__(self, model_path, confidence_thresh=0.25):
-        logger.info(f'Beginning DetectorBase initialization for {model_path.name}')
+        logger.debug(f'Beginning DetectorBase initialization for {model_path.name}')
         self.confidence_thresh = confidence_thresh
-        logger.info(f'confidence threshold set to f{confidence_thresh}')
+        logger.debug(f'confidence threshold set to {confidence_thresh}')
         self.interpreter = make_interpreter(str(model_path))
         self.interpreter.allocate_tensors()
-        logger.info(f'interpreter initialized and tensors allocated')
+        logger.debug(f'interpreter initialized and tensors allocated')
         self.input_size = common.input_size(self.interpreter)
-        logger.info(f'DetectorBase successfully initialized for {model_path.name}\n\n')
+        logger.info(f'DetectorBase successfully initialized for {model_path.name}')
 
     def detect(self, img):
         scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])

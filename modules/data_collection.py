@@ -12,20 +12,20 @@ from time import sleep
 class DataCollector:
 
     def __init__(self, video_dir, picamera_kwargs=None):
-        logger.info('Beginning data collector initialization')
+        logger.debug('Beginning data collector initialization')
         self.picamera_kwargs = picamera_kwargs
         self.video_dir = video_dir
         self.video_dir.mkdir(exist_ok=True, parents=True)
         self.cam = self.init_camera(picamera_kwargs)
         self.resolution = self.cam.resolution
-        logger.info('DataCollector successfully initialized\n\n')
+        logger.info('DataCollector successfully initialized')
 
     def init_camera(self, picamera_kwargs):
         if picamera_kwargs:
             cam = picamera.PiCamera(**picamera_kwargs)
         else:
             cam = picamera.PiCamera()
-        logger.info('camera initialized')
+        logger.debug('camera initialized')
         return cam
 
     def generate_h264_path(self):
@@ -62,14 +62,14 @@ class DataCollector:
 class MockDataCollector:
 
     def __init__(self, source_video, framegrab_interval):
-        logger.info('Beginning MockDataCollector initialization')
+        logger.debug('Beginning MockDataCollector initialization')
         self.source_video = source_video
         self.cap = cv2.VideoCapture(str(self.source_video))
         self.resolution = (int(self.cap.get(3)), int(self.cap.get(4)))
         self.framerate = int(self.cap.get(cv2.CAP_PROP_FPS))
         self.framestep = int(self.framerate * framegrab_interval)
         self.current_frame = 0
-        logger.info('MockDataCollector successfully initialized\n\n')
+        logger.info('MockDataCollector successfully initialized')
 
     def capture_frame(self):
         ret, img = self.cap.read()
