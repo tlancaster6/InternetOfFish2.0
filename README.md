@@ -71,3 +71,14 @@ main.py --pid your_project_id
 3) Once the default config has been generated, the program will exit. This is your opportunity to
 edit the config.yaml file with custom values, such as your Sendgrid credentials or dropbox upload 
 location (see setup instructions above)
+
+
+## Troubleshooting
+
+```
+Cannot make directory '/var/run/screen': Permission denied
+```
+To fix this error, run:
+```
+sudo /etc/init.d/screen-cleanup start
+```
