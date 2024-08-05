@@ -103,6 +103,7 @@ class Runner:
         except KeyboardInterrupt:
             logger.info('Keyboard Interrupt Detected. Running Cleanup operations, please wait until the program exits')
             self.collector.shutdown()
+            logger.info('uploading remaining data, please wait')
             self.uploader.convert_and_upload()
             logger.info('Shutdown complete. Exiting')
             sys.exit(0)
