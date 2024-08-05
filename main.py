@@ -15,7 +15,6 @@ from modules.behavior_recognition import BehaviorRecognizer
 from modules.config_manager import ConfigManager
 from modules.email_notification import Notifier, Notification
 
-
 # establish filesystem locations
 FILE = pathlib.Path(__file__).resolve()
 REPO_ROOT_DIR = FILE.parent  # repository root
@@ -82,7 +81,8 @@ class Runner:
         self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
         if self.config.test:
-            self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4', self.config.framegrab_interval)
+            self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4',
+                                               self.config.framegrab_interval)
             logger.info('runner successfully initialized in test mode')
         else:
             self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
@@ -93,8 +93,8 @@ class Runner:
         try:
             while True:
                 if self.config.test:
-                   self.test_mode()
-                   return
+                    self.test_mode()
+                    return
                 current_datetime = datetime.now()
                 if self.start_time < current_datetime.time() < self.end_time:
                     self.active_mode()
@@ -131,7 +131,8 @@ class Runner:
             self.behavior_recognizer.append_data(mock_timestamp.timestamp(), occupancy, thumbnail)
             mock_timestamp = mock_timestamp + self.framegrab_interval
             iter_count += 1
-        logger.info(f'fish detection complete. running behavior recognition with {len(self.behavior_recognizer.data_buffer)} unique occupancy values')
+        logger.info(
+            f'fish detection complete. running behavior recognition with {len(self.behavior_recognizer.data_buffer)} unique occupancy values')
         activity_fraction = self.behavior_recognizer.calc_activity_fraction()
         logger.info(f'double occupancy fraction: {activity_fraction}')
         if self.behavior_recognizer.check_for_behavior():
@@ -174,7 +175,7 @@ class Runner:
             if roi_slice:
                 img = img[roi_slice]
                 occupancy = len(self.ooi_detector.detect(img))
-                thumbnail = cv2.resize(img, (img.shape[1]//4, img.shape[0]//4))
+                thumbnail = cv2.resize(img, (img.shape[1] // 4, img.shape[0] // 4))
                 thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
                 self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
             if current_datetime >= next_behavior_check:
@@ -189,6 +190,9 @@ class Runner:
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
                 next_video_split = next_video_split + self.video_split_interval
+                # if the video is going to split less than an hour before the end time, prevent it
+                if next_video_split.hour == self.end_time.hour:
+                    next_video_split = next_video_split + timedelta(hours=1)
             pause.until(next_framegrab)
             current_datetime = datetime.now()
         self.collector.stop_recording()

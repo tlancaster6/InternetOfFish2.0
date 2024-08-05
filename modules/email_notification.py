@@ -64,7 +64,11 @@ class Notifier:
 
     def send_email(self, notification: Notification):
         mail = notification.as_mail(self.from_email, self.user_email)
-        response = self.api_client.send(mail)
+        try:
+            response = self.api_client.send(mail)
+        except Exception as e:
+            logger.warning(f'unexpected error during notification: {e}')
+            return
         if str(response.status_code) == '202':
             logger.debug('notification appears to have sent successfully')
             self.notification_count += 1
