@@ -67,7 +67,7 @@ class Notifier:
         try:
             response = self.api_client.send(mail)
         except Exception as e:
-            logger.warning(f'unexpected error during notification: {e.to_dict}')
+            logger.warning(f'unexpected error during notification: {e}')
             return
         if str(response.status_code) == '202':
             logger.debug('notification appears to have sent successfully')
@@ -85,6 +85,7 @@ class Notifier:
         if self.notification_count >= self.max_notifications_per_day:
             logger.debug('max notifications per day reached, rejecting notification request')
             return False
+        logger.debug('all conditions passed')
         return True
 
     def reset(self):

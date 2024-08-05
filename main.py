@@ -78,7 +78,9 @@ class Runner:
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
         self.behavior_recognizer = BehaviorRecognizer(self.config)
-        self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key)
+        self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key,
+                                 min_notification_interval=self.config.min_notification_interval,
+                                 max_notifications_per_day=self.config.max_notifications_per_day)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
         if self.config.test:
             self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4',
