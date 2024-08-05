@@ -197,7 +197,7 @@ class Runner:
                     notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
                                                 message=f'activity fraction: {self.behavior_recognizer.calc_activity_fraction()}',
                                                 attachment_path=str(mp4_path))
-                    self.notifier.send_email(notification)
+                    self.notifier.notify(notification)
                     next_behavior_check = next_behavior_check + self.behavior_check_interval
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
