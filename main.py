@@ -151,6 +151,7 @@ class Runner:
         self.uploader.convert_and_upload()
         logger.info('test complete. exiting.')
 
+
     def active_mode(self):
         logger.info('entering active collection mode')
         self.collector.start_recording()
@@ -175,7 +176,13 @@ class Runner:
                     next_roi_update = current_datetime + self.roi_update_interval
             if roi_slice:
                 img = img[roi_slice]
+                dets = self.ooi_detector.detect(img)
                 occupancy = len(self.ooi_detector.detect(img))
+
+                for det in dets:
+                    bbox = det.bbox
+                    cv2.rectangle(img, (bbox.xmin, bbox.ymin), (bbox.xmax, bbox.ymax), (0, 255, 0), 2)
+
                 thumbnail = cv2.resize(img, (img.shape[1] // 4, img.shape[0] // 4))
                 thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
                 self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
