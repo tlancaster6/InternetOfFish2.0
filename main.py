@@ -200,7 +200,9 @@ class Runner:
 
     def passive_mode(self):
         logger.info('entering passive upload mode')
+        logger.info('converting and uploading videos')
         self.uploader.convert_and_upload()
+        logger.info('conversion and upload complete')
         current_datetime = datetime.now()
         next_start = current_datetime.replace(hour=self.config.start_hour, minute=0, second=0, microsecond=0)
         if current_datetime.time() > self.end_time:
