@@ -67,7 +67,7 @@ class Notifier:
         try:
             response = self.api_client.send(mail)
         except Exception as e:
-            logger.warning(f'unexpected error during notification: {e}')
+            logger.warning(f'unexpected error during notification: {e.to_dict}')
             return
         if str(response.status_code) == '202':
             logger.debug('notification appears to have sent successfully')

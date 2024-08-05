@@ -137,6 +137,7 @@ class Runner:
         logger.info(f'double occupancy fraction: {activity_fraction}')
         if self.behavior_recognizer.check_for_behavior():
             logger.info('behavior event recognized. Preparing clip.')
+            self.video_dir.mkdir(exist_ok=True, parents=True)
             mp4_path = self.video_dir / f'eventclip_{int(datetime.now().timestamp())}.mp4'
             self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
             logger.info('sending email notification')
