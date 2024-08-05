@@ -209,6 +209,7 @@ class Runner:
             current_datetime = datetime.now()
         self.collector.stop_recording()
         self.notifier.reset()
+        self.behavior_recognizer.reset()
 
     def passive_mode(self):
         logger.info('entering passive upload mode')
