@@ -35,12 +35,12 @@ class ConfigManager:
     def check_config(self):
         updated = False
         if self.config['h_resolution'] % 32:
-            new_h_resolution = self.config['h_resolution'] + (32 - (self.config['h_resolution'] % 32))
+            new_h_resolution = self.config['h_resolution'] - (self.config['h_resolution'] % 32)
             logger.warning(f'horizontal resolution must be a multiple of 32. Updated to {new_h_resolution}')
             self.config['h_resolution'] = new_h_resolution
             updated = True
         if self.config['h_resolution'] % 16:
-            new_v_resolution = self.config['h_resolution'] + (16 - (self.config['h_resolution'] % 16))
+            new_v_resolution = self.config['h_resolution'] - (self.config['h_resolution'] % 16)
             logger.warning(f'vertical resolution must be a multiple of 32. Updated to {new_v_resolution}')
             self.config['h_resolution'] = new_v_resolution
             updated = True
@@ -77,8 +77,8 @@ class ConfigManager:
             # 'behavior_min_event_length': 5,     # minimum duration (in seconds) of a valid DBSCAN cluster
             'behavior_min_fraction_for_notification': 0.25,
             'framerate': 30,
-            'h_resolution': 1280,
-            'v_resolution': 720,
+            'h_resolution': 1632,
+            'v_resolution': 1232,
             'framegrab_interval': 0.2,
             'roi_update_interval': 600,
             'start_hour': 7,
