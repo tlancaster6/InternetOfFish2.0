@@ -177,11 +177,11 @@ class Runner:
                 if roi_det:
                     roi_slice = np.s_[roi_det[0].bbox.ymin:roi_det[0].bbox.ymax,
                                 roi_det[0].bbox.xmin:roi_det[0].bbox.xmax]
+                    print(f'roi_slice: {roi_slice}')
+                    print(f'roi_det: {roi_det}')
                     next_roi_update = current_datetime + self.roi_update_interval
             if roi_slice:
                 img = img[roi_slice]
-                print(img.shape)
-                print(roi_slice)
                 dets = self.ooi_detector.detect(img)
                 occupancy = len(self.ooi_detector.detect(img))
 
