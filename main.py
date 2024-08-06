@@ -209,7 +209,8 @@ class Runner:
                 self.collector.split_recording()
                 next_video_split = next_video_split + self.video_split_interval
                 # if the video is going to split less than 30 seconds before the end time, prevent it
-                if (end_datetime - next_video_split) < 30:
+                if (end_datetime - next_video_split).total_seconds() < 30:
+                    logger.debug(f'skipping video split at {next_video_split.isoformat()}: too close to end time')
                     next_video_split = next_video_split + timedelta(hours=1)
             pause.until(next_framegrab)
             current_datetime = datetime.now()
