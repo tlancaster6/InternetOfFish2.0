@@ -155,11 +155,16 @@ class Runner:
         logger.info('test complete. exiting.')
 
 
-    def active_mode(self):
+    def active_mode(self, round_video_split_time=True):
         logger.info('entering active collection mode')
         self.collector.start_recording()
         current_datetime = datetime.now()
-        next_video_split = (current_datetime + self.video_split_interval).replace(minute=0, second=0, microsecond=0)
+        if round_video_split_time:
+            next_video_split = (current_datetime + self.video_split_interval).replace(minute=0, second=0, microsecond=0)
+        else:
+            next_video_split = current_datetime + self.video_split_interval
+        end_datetime = current_datetime.replace(hour=self.end_time.hour, minute=self.end_time.minute,
+                                                second=self.end_time.second, microsecond=0)
         next_roi_update = current_datetime
         next_behavior_check = current_datetime + self.behavior_check_interval
         roi_det, roi_slice = None, None
@@ -171,6 +176,7 @@ class Runner:
                 logger.debug(f'invalid image with shape {img.shape} encountered. Skipping')
                 pause.until(next_framegrab)
                 current_datetime = datetime.now()
+                continue
             if current_datetime >= next_roi_update:
                 roi_det = self.roi_detector.detect(img)
                 if roi_det:
@@ -202,8 +208,8 @@ class Runner:
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
                 next_video_split = next_video_split + self.video_split_interval
-                # if the video is going to split less than an hour before the end time, prevent it
-                if next_video_split.hour == self.end_time.hour:
+                # if the video is going to split less than 30 seconds before the end time, prevent it
+                if (end_datetime - next_video_split) < 30:
                     next_video_split = next_video_split + timedelta(hours=1)
             pause.until(next_framegrab)
             current_datetime = datetime.now()

@@ -33,6 +33,9 @@ class DataCollector:
         return self.video_dir / f'{iso_string}.h264'
 
     def start_recording(self):
+        if self.cam.closed:
+            logger.debug('reinitializing camera from scratch')
+            self.cam = self.init_camera(self.picamera_kwargs)
         self.cam.start_recording(str(self.generate_h264_path()))
         sleep(2)
         logger.info('recording started')
