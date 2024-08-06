@@ -7,8 +7,8 @@ logger = logging.getLogger(__name__)
 pid = input('enter pid: ')
 config_path = DEFAULT_DATA_DIR / pid / 'config.yaml'
 runner = Runner(config_path)
-runner.video_split_interval = timedelta(minutes=2)
-mode_switch_interval = timedelta(minutes=5)
+runner.video_split_interval = timedelta(minutes=1)
+mode_switch_interval = timedelta(minutes=3)
 
 for test_iter in range(3):
     logger.info(f'running test iteration {test_iter}')

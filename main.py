@@ -212,8 +212,8 @@ class Runner:
                     next_video_split = next_video_split + timedelta(hours=1)
             if (datetime.now() - current_datetime) > self.framegrab_interval:
                 logger.warning(f'main loop time ({datetime.now() - current_datetime}) exceeded target framegrab '
-                               f'interval {self.framegrab_interval}. Reduce the target frame grab rate for best '
-                               f'results')
+                               f'interval {self.framegrab_interval}. If this warning prints repeatedly, increase the '
+                               f'target frame grab rate for best results')
             pause.until(next_framegrab)
             current_datetime = datetime.now()
         self.collector.stop_recording()
