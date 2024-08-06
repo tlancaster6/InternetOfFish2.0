@@ -15,4 +15,5 @@ for test_iter in range(3):
     runner.end_time = (datetime.now() + mode_switch_interval).time()
     runner.active_mode(round_video_split_time=False)
     runner.start_time = (datetime.now() + mode_switch_interval).time()
+    runner.end_time = (datetime.now() + mode_switch_interval + mode_switch_interval).time()
     runner.passive_mode()
