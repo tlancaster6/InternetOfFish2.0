@@ -22,6 +22,8 @@ class DetectorBase:
 
     def detect(self, img):
         scale = (self.input_size[1] / img.shape[1], self.input_size[0] / img.shape[0])
+        print(scale)
+        print(self.input_size)
         img = cv2.resize(img, self.input_size)
         run_inference(self.interpreter, img.tobytes())
         dets = detect.get_objects(self.interpreter, self.confidence_thresh, scale)
