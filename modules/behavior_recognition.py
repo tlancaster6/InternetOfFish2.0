@@ -26,7 +26,6 @@ class BehaviorRecognizer:
     def append_data(self, timestamp, occupancy, thumbnail):
         self.data_buffer.append((timestamp, occupancy, thumbnail))
         while (len(self.data_buffer) >= 2) and (self.calc_buffer_length_seconds() > self.behavior_check_window):
-            logger.debug(f'buffer too long, popping. length s: {self.calc_buffer_length_seconds()}. length n: {len(self.data_buffer)}Max: {self.behavior_check_window}')
             self.data_buffer.pop(0)
 
     def calc_activity_fraction(self):

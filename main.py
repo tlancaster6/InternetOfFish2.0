@@ -215,6 +215,10 @@ class Runner:
                 if (end_datetime - next_video_split).total_seconds() < 30:
                     logger.debug(f'skipping video split at {next_video_split.isoformat()}: too close to end time')
                     next_video_split = next_video_split + timedelta(hours=1)
+            if (datetime.now() - current_datetime) > self.framegrab_interval:
+                logger.warning(f'main loop time ({datetime.now() - current_datetime}) exceeded target framegrab '
+                               f'interval {self.framegrab_interval}. Reduce the target frame grab rate for best '
+                               f'results')
             pause.until(next_framegrab)
             current_datetime = datetime.now()
         self.collector.stop_recording()
