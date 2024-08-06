@@ -174,6 +174,7 @@ class Runner:
             img = self.collector.capture_frame()
             if current_datetime >= next_roi_update:
                 roi_det = self.roi_detector.detect(img)
+                print(roi_det)
                 if roi_det:
                     roi_slice = np.s_[roi_det[0].bbox.ymin:roi_det[0].bbox.ymax,
                                 roi_det[0].bbox.xmin:roi_det[0].bbox.xmax]
