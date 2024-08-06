@@ -172,6 +172,7 @@ class Runner:
         while self.start_time < current_datetime.time() < self.end_time:
             next_framegrab = current_datetime + self.framegrab_interval
             img = self.collector.capture_frame()
+            print(img.shape)
             if (img.shape[0] == 0) or (img.shape[1] == 0):
                 logger.warning(f'invalid image with shape {img.shape} encountered. Skipping')
                 pause.until(next_framegrab)
