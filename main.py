@@ -166,7 +166,7 @@ class Runner:
         end_datetime = current_datetime.replace(hour=self.end_time.hour, minute=self.end_time.minute,
                                                 second=self.end_time.second, microsecond=0)
         next_roi_update = current_datetime
-        next_behavior_check = current_datetime + self.behavior_check_interval
+        next_behavior_check = current_datetime + self.config.behavior_check_window
         roi_det, roi_slice = None, None
 
         while self.start_time < current_datetime.time() < self.end_time:
@@ -202,7 +202,7 @@ class Runner:
                         self.notifier.notify(notification)
                     else:
                         logger.debug('possible behavior event detected but notification conditions not passed')
-                    next_behavior_check = next_behavior_check + self.behavior_check_interval
+                    next_behavior_check = current_datetime + self.behavior_check_interval
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
                 next_video_split = next_video_split + self.video_split_interval
@@ -216,7 +216,7 @@ class Runner:
             #                    f'target frame grab rate for best results')
             pause.until(next_framegrab)
             current_datetime = datetime.now()
-        self.collector.stop_recording()
+        self.collector.shutdown()
         self.notifier.reset()
         self.behavior_recognizer.reset()
 

@@ -54,6 +54,7 @@ class DataCollector:
         return image
 
     def shutdown(self):
+        logger.debug('shutting down DataCollector')
         try:
             self.stop_recording()
         except picamera.PiCameraNotRecording:
