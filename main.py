@@ -31,7 +31,8 @@ if not LOG_DIR.exists():
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter(fmt='%(asctime)s %(name)-16s %(levelname)-8s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-fh = RotatingFileHandler(str(LOG_DIR / 'debug.log'), maxBytes=500000, backupCount=2)
+log_path = str(LOG_DIR / 'debug.log')
+fh = RotatingFileHandler(log_path, maxBytes=500000, backupCount=2)
 fh.setLevel(logging.DEBUG)
 fh.setFormatter(formatter)
 ch = logging.StreamHandler()
@@ -78,7 +79,10 @@ class Runner:
         self.roi_detector = DetectorBase(MODEL_DIR / self.config.roi_model, self.config.roi_confidence_thresh)
         self.ooi_detector = DetectorBase(MODEL_DIR / self.config.ooi_model, self.config.ooi_confidence_thresh)
         self.behavior_recognizer = BehaviorRecognizer(self.config)
-        self.notifier = Notifier(self.config.user_email, self.config.sendgrid_from_email, self.config.sendgrid_api_key,
+        self.notifier = Notifier(user_email=self.config.user_email,
+                                 from_email=self.config.sendgrid_from_email,
+                                 api_key=self.config.sendgrid_api_key,
+                                 admin_email=self.config.admin_email,
                                  min_notification_interval=self.config.min_notification_interval,
                                  max_notifications_per_day=self.config.max_notifications_per_day)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
@@ -109,6 +113,18 @@ class Runner:
             self.uploader.convert_and_upload()
             logger.info('Shutdown complete. Exiting')
             sys.exit(0)
+        except Exception as e:
+            logger.warning(f'unknown exception: {e}')
+            notification = Notification(subject=f'Unexpected Error in {self.config.project_id}',
+                                        message=f'{e}',
+                                        attachment_path=log_path)
+            self.notifier.send_user_email(notification)
+            self.notifier.send_admin_email(notification)
+            try:
+                self.collector.shutdown()
+                self.uploader.convert_and_upload()
+            finally:
+                sys.exit(0)
 
     def test_mode(self):
         logger.info('commencing test')
@@ -153,7 +169,6 @@ class Runner:
         logger.info('uploading results')
         self.uploader.convert_and_upload()
         logger.info('test complete. exiting.')
-
 
     def active_mode(self, round_video_split_time=True):
         logger.info('entering active collection mode')

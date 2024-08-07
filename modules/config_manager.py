@@ -60,6 +60,7 @@ class ConfigManager:
             'project_id': self.config_path.parent.name,
             'cloud_data_dir': None,   # cloud path, including the rclone remote, where the project will be stored
             'user_email': None,
+            'admin_email': None,
             'sendgrid_api_key': None,
             'sendgrid_from_email': None,
             'min_notification_interval': 600,

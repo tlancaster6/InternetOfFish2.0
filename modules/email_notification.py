@@ -40,9 +40,9 @@ class Notification:
 
 class Notifier:
 
-    def __init__(self, user_email, from_email, api_key, min_notification_interval=600, max_notifications_per_day=20):
+    def __init__(self, user_email, from_email, api_key, admin_email, min_notification_interval=600, max_notifications_per_day=20):
         logger.debug('Beginning Notifier initialization')
-        self.user_email, self.from_email, self.api_key = user_email, from_email, api_key
+        self.user_email, self.from_email, self.admin_email, self.api_key = user_email, from_email, admin_email, api_key
         self.disabled_flag = (self.user_email is None) or (self.api_key is None)
         self.min_notification_interval = min_notification_interval
         self.last_notification_timestamp = 0
@@ -60,9 +60,9 @@ class Notifier:
             logger.debug('ignoring notification call because notifier is in light mode')
             return
         if override_checks or self.check_conditions():
-            self.send_email(notification)
+            self.send_user_email(notification)
 
-    def send_email(self, notification: Notification):
+    def send_user_email(self, notification: Notification):
         mail = notification.as_mail(self.from_email, self.user_email)
         try:
             response = self.api_client.send(mail)
@@ -76,6 +76,25 @@ class Notifier:
         else:
             logger.warning(f'Expected response status code 202 from sendgrid api, got {response.status_code}. '
                            f'Email notification likely failed')
+
+    def send_admin_email(self, notification: Notification):
+        if self.admin_email is not None:
+            mail = notification.as_mail(self.from_email, self.admin_email)
+            try:
+                response = self.api_client.send(mail)
+            except Exception as e:
+                logger.warning(f'unexpected error during notification: {e}')
+                return
+            if str(response.status_code) == '202':
+                logger.debug('notification appears to have sent successfully')
+                self.notification_count += 1
+                self.last_notification_timestamp = time.time()
+            else:
+                logger.warning(f'Expected response status code 202 from sendgrid api, got {response.status_code}. '
+                               f'Email notification likely failed')
+        else:
+            logger.debug('admin email not found. skipping.')
+
 
     def check_conditions(self):
         logger.debug('checking notification conditions')

@@ -15,6 +15,7 @@ git clone https://github.com/tlancaster6/InternetOfFish2.0
 4) Open the terminal and install the remaining dependencies. Note building numpy can take
 a long time.
 ```
+sudo apt install screen
 sudo pip3 install --upgrade pip
 sudo pip3 install pandas
 sudo pip3 install pause
