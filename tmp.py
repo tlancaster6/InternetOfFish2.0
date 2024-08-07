@@ -1,6 +1,7 @@
 from main import Runner, DEFAULT_DATA_DIR
 from datetime import datetime, timedelta
 import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -18,4 +19,17 @@ for test_iter in range(3):
     runner.end_time = (datetime.now() + mode_switch_interval + mode_switch_interval).time()
     runner.passive_mode()
 
-raise Exception('test exception')
+try:
+    raise Exception('test exception')
+except Exception as e:
+    logger.warning(f'unknown exception: {e}')
+    notification = Notification(subject=f'Unexpected Error in {runner.config.project_id}',
+                                message=f'{e}',
+                                attachment_path=log_path)
+    runner.notifier.send_user_email(notification)
+    runner.notifier.send_admin_email(notification)
+    try:
+        runner.collector.shutdown()
+        runner.uploader.convert_and_upload()
+    finally:
+        sys.exit(0)
