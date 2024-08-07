@@ -184,7 +184,7 @@ class Runner:
         end_datetime = current_datetime.replace(hour=self.end_time.hour, minute=self.end_time.minute,
                                                 second=self.end_time.second, microsecond=0)
         next_roi_update = current_datetime
-        next_behavior_check = current_datetime + self.config.behavior_check_window
+        next_behavior_check = current_datetime + timedelta(seconds=self.config.behavior_check_window)
         roi_det, roi_slice = None, None
 
         while self.start_time < current_datetime.time() < self.end_time:
