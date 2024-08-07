@@ -114,16 +114,19 @@ class Runner:
             logger.info('Shutdown complete. Exiting')
             sys.exit(0)
         except Exception as e:
-            logger.warning(f'unknown exception: {e}')
+            logger.exception(f'unknown exception: {e}')
+            logger.warning('shutting down due to unknown exception')
             notification = Notification(subject=f'Unexpected Error in {self.config.project_id}',
                                         message=f'{e}',
                                         attachment_path=log_path)
+            logger.info('attempting to notify user and admin of error')
             self.notifier.send_user_email(notification)
             self.notifier.send_admin_email(notification)
             try:
                 self.collector.shutdown()
                 self.uploader.convert_and_upload()
             finally:
+                logger.info('shutdown complete. Exiting')
                 sys.exit(0)
 
     def test_mode(self):
