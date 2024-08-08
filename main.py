@@ -186,7 +186,7 @@ class Runner:
         next_roi_update = current_datetime
         next_behavior_check = current_datetime + timedelta(seconds=self.config.behavior_check_window)
         roi_det, roi_slice = None, None
-        expected_data_buffer_length = (self.config.behavior_check_window / self.framegrab_interval)
+        expected_data_buffer_length = (self.config.behavior_check_window / self.config.framegrab_interval)
         minimum_viable_data_buffer_length = expected_data_buffer_length // 2
 
         while self.start_time < current_datetime.time() < self.end_time:
