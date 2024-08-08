@@ -186,6 +186,8 @@ class Runner:
         next_roi_update = current_datetime
         next_behavior_check = current_datetime + timedelta(seconds=self.config.behavior_check_window)
         roi_det, roi_slice = None, None
+        expected_data_buffer_length = (self.config.behavior_check_window / self.framegrab_interval)
+        minimum_viable_data_buffer_length = expected_data_buffer_length // 2
 
         while self.start_time < current_datetime.time() < self.end_time:
             next_framegrab = current_datetime + self.framegrab_interval
@@ -209,7 +211,10 @@ class Runner:
                 thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
                 self.behavior_recognizer.append_data(current_datetime.timestamp(), occupancy, thumbnail)
             if current_datetime >= next_behavior_check:
-                if self.behavior_recognizer.check_for_behavior():
+                if len(self.behavior_recognizer.data_buffer) <  minimum_viable_data_buffer_length:
+                    logger.warning(f'Data buffer unusually short. Expected approximately {expected_data_buffer_length}. '
+                                   f'Got {len(self.behavior_recognizer.data_buffer)}')
+                elif self.behavior_recognizer.check_for_behavior():
                     if self.notifier.check_conditions():
                         logger.info('possible behavioral event. Sending notification')
                         mp4_path = self.video_dir / f'eventclip_{int(current_datetime.timestamp())}.mp4'
