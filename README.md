@@ -183,6 +183,13 @@ To fix this error, run:
 ```
 sudo /etc/init.d/screen-cleanup start
 ```
+If you find you're getting this error alot, you can add the command a crontab job that will run every time you restart.
+Open your crontab file with "sudo crontab -e" and add the following line:
+```
+@reboot sudo /etc/init.d/screen-cleanup start
+```
+save your changes and close the editor. Restart the pi and confirm that screen now works without running the cleanup
+command manually. 
 
 ## Explanation of config.yaml parameters
 the config.yaml file contains parameters that you can modify to control how the program will run or enable additional
