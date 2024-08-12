@@ -225,7 +225,7 @@ class Runner:
                         self.notifier.notify(notification)
                     else:
                         logger.debug('possible behavior event detected but notification conditions not passed')
-                    next_behavior_check = current_datetime + self.behavior_check_interval
+                next_behavior_check = current_datetime + self.behavior_check_interval
             if current_datetime >= next_video_split:
                 self.collector.split_recording()
                 next_video_split = next_video_split + self.video_split_interval
