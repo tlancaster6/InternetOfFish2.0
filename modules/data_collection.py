@@ -57,9 +57,13 @@ class DataCollector:
         logger.debug('shutting down DataCollector')
         try:
             self.stop_recording()
+            sleep(1)
         except picamera.PiCameraNotRecording:
             logger.debug('Could not stop recording because camera was not recording. Skipping.')
         self.cam.close()
+        sleep(1)
+        if not self.cam.closed:
+            logger.warning('camera object may not have closed correctly. Expected self.cam.closed==True, got False')
         logger.info('DataCollector shutdown complete')
 
 
