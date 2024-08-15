@@ -22,7 +22,7 @@ But because the fish constantly move in and out of the ROI, their positions (and
 estimated multiple times per second. Periodically, (by default, once every thirty seconds) the system 
 analyzes the most recent occupancy data (by default, the most recent minute of data) to infer whether 
 courtship is occurring. If so, it uses SendGrid to notify a researcher via email. This continues until a set
-time (by default, 7pm) when the system switches to passie mode. Passive mode is relatively simple; 
+time (by default, 7pm) when the system switches to passive mode. Passive mode is relatively simple; 
 stored data, in the form of H264 videos, is converted to MP4 format for better accessibility then 
 uploaded to Dropbox using rclone. The system then idles until the time when active mode is scheduled to enter 
 active mode again (by default, 7am the next day). This cycle continues until a user terminates the program.
