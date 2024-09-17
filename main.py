@@ -8,7 +8,7 @@ import logging
 import cv2
 from logging.handlers import RotatingFileHandler
 
-from modules.data_collection import DataCollector, MockDataCollector
+from modules.data_collection import DataCollector
 from modules.object_detection import DetectorBase
 from modules.upload_automation import Uploader
 from modules.behavior_recognition import BehaviorRecognizer
@@ -21,7 +21,7 @@ REPO_ROOT_DIR = FILE.parent  # repository root
 MODEL_DIR = REPO_ROOT_DIR / 'models'
 DEFAULT_DATA_DIR = REPO_ROOT_DIR / 'projects'
 LOG_DIR = REPO_ROOT_DIR / 'logs'
-TESTING_RESOURCEC_DIR = REPO_ROOT_DIR / 'resources'
+TESTING_RESOURCE_DIR = REPO_ROOT_DIR / 'resources'
 if str(REPO_ROOT_DIR) not in sys.path:
     sys.path.append(str(REPO_ROOT_DIR))
 if not LOG_DIR.exists():
@@ -86,21 +86,13 @@ class Runner:
                                  min_notification_interval=self.config.min_notification_interval,
                                  max_notifications_per_day=self.config.max_notifications_per_day)
         self.uploader = Uploader(self.project_dir, self.config.cloud_data_dir, self.config.framerate)
-        if self.config.test:
-            self.collector = MockDataCollector(TESTING_RESOURCEC_DIR / 'sample_clip.mp4',
-                                               self.config.framegrab_interval)
-            logger.info('runner successfully initialized in test mode')
-        else:
-            self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
-            logger.info('runner successfully initialized')
+        self.collector = DataCollector(self.video_dir, self.picamera_kwargs)
+        logger.info('runner successfully initialized')
 
     def run(self):
         logger.info('Entering main run loop. Press Ctrl-C at any time to exit')
         try:
             while True:
-                if self.config.test:
-                    self.test_mode()
-                    return
                 current_datetime = datetime.now()
                 if self.start_time < current_datetime.time() < self.end_time:
                     self.active_mode()
@@ -129,49 +121,6 @@ class Runner:
                 logger.info('shutdown complete. Exiting')
                 sys.exit(0)
 
-    def test_mode(self):
-        logger.info('commencing test')
-        first_img = self.collector.capture_frame()
-        logger.info('locating ROI')
-        roi_det = self.roi_detector.detect(first_img)
-        roi_slice = np.s_[roi_det[0].bbox.ymin:roi_det[0].bbox.ymax,
-                    roi_det[0].bbox.xmin:roi_det[0].bbox.xmax]
-        logger.info(f'ROI located. ROI slice set to {roi_slice}')
-        logger.info(f'Commencing OOI detection')
-        mock_timestamp = datetime(year=2000, month=1, day=1, hour=12)
-        iter_count = 0
-        while True:
-            img = self.collector.capture_frame()
-            if img is False:
-                break
-            img = img[roi_slice]
-            dets = self.ooi_detector.detect(img)
-            occupancy = len(dets)
-            logger.info(f'\t{iter_count}| frame {self.collector.current_frame} occupancy: {occupancy}')
-            thumbnail = cv2.resize(img, (img.shape[1] // 4, img.shape[0] // 4))
-            thumbnail = cv2.cvtColor(thumbnail, cv2.COLOR_RGB2BGR)
-            self.behavior_recognizer.append_data(mock_timestamp.timestamp(), occupancy, thumbnail)
-            mock_timestamp = mock_timestamp + self.framegrab_interval
-            iter_count += 1
-        logger.info(
-            f'fish detection complete. running behavior recognition with {len(self.behavior_recognizer.data_buffer)} unique occupancy values')
-        activity_fraction = self.behavior_recognizer.calc_activity_fraction()
-        logger.info(f'double occupancy fraction: {activity_fraction}')
-        if self.behavior_recognizer.check_for_behavior():
-            logger.info('behavior event recognized. Preparing clip.')
-            self.video_dir.mkdir(exist_ok=True, parents=True)
-            mp4_path = self.video_dir / f'eventclip_{int(datetime.now().timestamp())}.mp4'
-            self.behavior_recognizer.thumbnails_to_mp4(mp4_path)
-            logger.info('sending email notification')
-            notification = Notification(subject=f'possible behavioral event in {self.config.project_id}',
-                                        message=f'activity fraction: {self.behavior_recognizer.calc_activity_fraction()}',
-                                        attachment_path=str(mp4_path))
-            self.notifier.notify(notification)
-        else:
-            logger.info('behavioral event not recognized')
-        logger.info('uploading results')
-        self.uploader.convert_and_upload()
-        logger.info('test complete. exiting.')
 
     def active_mode(self, round_video_split_time=True):
         logger.info('entering active collection mode')
@@ -233,10 +182,6 @@ class Runner:
                 if -30 < (end_datetime - next_video_split).total_seconds() < 30:
                     logger.debug(f'skipping video split at {next_video_split.isoformat()}: too close to end time')
                     next_video_split = next_video_split + timedelta(hours=1)
-            # if (datetime.now() - current_datetime) > self.framegrab_interval:
-            #     logger.warning(f'main loop time ({datetime.now() - current_datetime}) exceeded target framegrab '
-            #                    f'interval {self.framegrab_interval}. If this warning prints repeatedly, increase the '
-            #                    f'target frame grab rate for best results')
             pause.until(next_framegrab)
             current_datetime = datetime.now()
         self.collector.shutdown()
@@ -266,34 +211,14 @@ def parse_opt(known=False):
                              'Otherwise, a new project with that ID will be created and the program will exit so that'
                              'you can edit the default config.yaml file if necessary.',
                         default=None)
-
-    parser.add_argument('--test',
-                        action='store_true',
-                        help='run a suite of automated tests to diagnose potential problems')
-
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
 
 if __name__ == "__main__":
     opt = parse_opt()
-    if opt.test:
-        config_path = DEFAULT_DATA_DIR / 'test_project' / 'config.yaml'
-        if not config_path.exists():
-            config_manager = ConfigManager(config_path)
-            config_manager.generate_test_config()
-            print(
-                'default config generated. To test email notification and automated uploads, open the config.yaml file now '
-                '(located under projects/interactive_test), provide appropriate values for cloud_data_dir, user_email, '
-                'sendgrid_api_key, and sendgrid_from_email, then save and close the config file. Or leave the config.yaml '
-                'file alone to skip these tests. ')
-            input('Press enter when ready to resume testing')
+    config_path = DEFAULT_DATA_DIR / opt.project_id / 'config.yaml'
+    if config_path.exists():
         runner = Runner(config_path)
         runner.run()
-
     else:
-        config_path = DEFAULT_DATA_DIR / opt.project_id / 'config.yaml'
-        if config_path.exists():
-            runner = Runner(config_path)
-            runner.run()
-        else:
-            new_project(config_path)
+        new_project(config_path)
